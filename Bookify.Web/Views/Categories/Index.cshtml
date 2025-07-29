@@ -47,11 +47,47 @@
                     <h5 class="mb-1">No Categories found!</h5>
                     </div>
                     <!--end::Content-->
-                </div>
+            </div>
         }
         else
         {
-            
+            <div class="table-responsive">
+			    <div class="py-5 pb-6">
+				    <div class="table-responsive">
+					    <table class="table table-row-bordered gy-7">
+						    <thead>
+							    <tr class="fw-bold fs-6 text-gray-800">
+								    <th>Name</th>
+								    <th>Status</th>
+								    <th>Created On</th>
+								    <th>Last Updated On</th>
+								    <th>Action</th>
+							    </tr>
+						    </thead>
+						    <tbody>
+                                @foreach(var Category in Model)
+                                {
+                                    <tr>
+                                        <td>@Category.Name</td>
+                                        <td>
+                                            <span class="badge badge-light-@(Category.IsDeleted ? "danger" : "success")">
+                                                @(Category.IsDeleted ? "Deleted" : "Available")
+                                            </span>
+                                        </td>
+                                        <td>@Category.CreatedOn</td>
+                                        <td>@Category.LastUpdatedOn</td>
+                                        <td>
+                                            <a class="btn btn-sm btn-outline btn-outline-dashed btn-outline-primary btn-active-light-primary" asp-controller="Categories" asp-action="Edit" asp-route-id="@Category.Id">Edit</a>
+                                         
+                                        </td>
+                                    </tr>
+                                }
+						    </tbody>
+					    </table>
+				    </div>
+			    </div>
+            </div>
         }
     </div>
 </div>
+
