@@ -20,3 +20,15 @@ html {
 body {
   margin-bottom: 60px;
 }
+
+/*Start Override Bootbox*/
+.modal-header border-0 {
+    padding: 20px;
+}
+.modal-body {
+    padding: 8px 30px;
+}
+.modal-footer {
+    padding: 10px;
+}
+/*End Override Bootbox*/
