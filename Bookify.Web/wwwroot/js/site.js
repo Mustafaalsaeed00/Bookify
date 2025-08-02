@@ -1,4 +1,4 @@
-﻿
+﻿var updatedRow;
 function ShowSuccessMessage(message = "Saved Successfully!") {
     Swal.fire({
         icon: "success",
@@ -23,10 +23,54 @@ function ShowErrorMessage(message = "Something went wrong!") {
     });
 }
 
+function onModalSuccess(item) {
+    ShowSuccessMessage()
+    var modal = $('#Modal');
+    modal.modal('hide');
+    if (updatedRow === undefined) {
+        $('tbody').append(item);
+    }
+    else {
+        $(updatedRow).replaceWith(item);
+        updatedRow = undefined;
+    }
+    KTMenu.init();
+    KTMenu.initHandlers();
+}
 
 $(document).ready(function () {
+    
     var message = $('#Message').text();
     if (message !== '') {
         ShowSuccessMessage(message)
     }
+    //Handle bootstrap modal
+    $('body').delegate('.js-render-modal','click', function () {
+        var btn = $(this);
+        var modal = $('#Modal');
+        modal.find('#ModalLabel').text(btn.data('title'));
+
+        if (btn.data('update') !== undefined) {
+            updatedRow = btn.parents('tr');
+        }
+
+        $.get({
+            
+            url: btn.data('url'),
+            success: function (form) {
+                modal.find('.modal-body').html(form);
+                $.validator.unobtrusive.parse(modal);
+            },
+            error: function () {
+                ShowErrorMessage();
+            }
+        });
+
+        modal.modal('show');
+
+
+
+
+    });
+
 });

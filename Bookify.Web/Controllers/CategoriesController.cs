@@ -1,4 +1,5 @@
-﻿using Microsoft.AspNetCore.Mvc;
+﻿using Bookify.Web.Filters;
+using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 
 namespace Bookify.Web.Controllers
@@ -20,9 +21,10 @@ namespace Bookify.Web.Controllers
 		}
 
 		[HttpGet]
+		[AjaxOnly]
 		public IActionResult Create()
 		{
-			return View("Form");
+			return PartialView("_Form");
 		}
 
 		[HttpPost]
@@ -30,30 +32,30 @@ namespace Bookify.Web.Controllers
 		public IActionResult Create(CategoryFormViewModel model)
 		{
 			if(!ModelState.IsValid)
-				return View("Form", model);
+				return BadRequest();
 
 			Category category = new Category() { Name = model.Name };
 			_context.Add(category);
 
 			_context.SaveChanges();
-			TempData["Message"] = "Saved Successfully";
 
-			return RedirectToAction(nameof(Index));
+			return PartialView("_CategoryRow",category);
 		}
 
 		[HttpGet]
+		[AjaxOnly]
 		public IActionResult Edit(int id)
 		{
 			var category = _context.Categories.Find(id);
 			if (category is null)
-				return NotFound();
+				return BadRequest();
 
 			var categoryViewModel = new CategoryFormViewModel
 			{
 				Id = id,
 				Name = category.Name,
 			};
-			return View("Form" , categoryViewModel);
+			return PartialView("_Form",categoryViewModel);
 		}
 
 		[HttpPost]
@@ -61,19 +63,18 @@ namespace Bookify.Web.Controllers
 		public IActionResult Edit(CategoryFormViewModel model)
 		{
 			if (!ModelState.IsValid)
-				return View("Form",model);
+				return BadRequest();
 
 			var category = _context.Categories.Find(model.Id);
 			if (category is null)
-				return NotFound();
+				return BadRequest();
 
 			category.Name = model.Name;
 			category.LastUpdatedOn = DateTime.Now;
 
 			_context.SaveChanges();
-			TempData["Message"] = "Saved Successfully";
 
-			return RedirectToAction(nameof(Index));
+			return PartialView("_CategoryRow", category);
 		}
 
 		[HttpPost]
