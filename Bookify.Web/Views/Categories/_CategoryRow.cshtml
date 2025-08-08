@@ -1,4 +1,4 @@
-﻿@model Category
+﻿@model CategoryViewModel
 <tr>
     <td>@Model.Name</td>
     <td>
@@ -33,7 +33,7 @@
             <!--end::Menu item-->
             <!--begin::Menu item-->
             <div class="menu-item px-3">
-                <a href="javascript:;" class="menu-link px-3 js-toggle-status" data-id="@Model.Id">Toggle Status</a>
+                <a href="javascript:;" class="menu-link px-3 js-toggle-status"  data-url="Categories/ToggleStatus/@Model.Id">Toggle Status</a>
             </div>
             <!--end::Menu item-->
 

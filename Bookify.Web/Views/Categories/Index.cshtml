@@ -1,4 +1,4 @@
-﻿@model IEnumerable<Category>
+﻿@model IEnumerable<CategoryViewModel>
 @inject Microsoft.AspNetCore.Antiforgery.IAntiforgery antiforgery
 @{
 	ViewData["Title"] = "Categories";
@@ -136,53 +136,4 @@
 @section Scripts {
 	<partial name="_ValidationScriptsPartial" />
 
-	<script>
-
-		$(document).ready(function(){
-
-			$("body").delegate('.js-toggle-status',"click" , function(){
-				var btn = $(this);
-
-			bootbox.confirm({
-				message: 'Are you sure!',
-				centerVertical:true,
-				buttons: {
-					confirm: {
-						label: 'Yes',
-						className: 'btn-sm btn-danger'
-					},
-					cancel: {
-						label: 'No',
-						className: 'btn-sm btn-secondary'
-					}
-			},
-			callback: function (result) {
-				if(result)
-				{
-				$.post({
-					url: "Categories/ToggleStatus/" + btn.data('id'),
-					data: {"__RequestVerificationToken": $('input[name="__RequestVerificationToken"]').val()
-					},
-					success: function(UpdatedOn){
-						var row = btn.parents('tr');
-						var status = row.find('.js-status');
-						var newStatus = status.text().trim() === 'Deleted' ? 'Available' : 'Deleted';
-						status.text(newStatus).toggleClass('badge-light-danger badge-light-success');
-						var lastupdated = row.find('.js-updated-on');
-						lastupdated.text(UpdatedOn);
-						row.addClass('animate__animated animate__flash');
-						ShowSuccessMessage();
-					},
-					error:function(){
-						ShowErrorMessage();
-					}
-				});
-				}
-			}
-		});
-
-
-			});
-		});
-	</script>
 }

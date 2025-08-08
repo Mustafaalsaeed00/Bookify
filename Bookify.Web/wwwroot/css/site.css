@@ -31,4 +31,8 @@ body {
 .modal-footer {
     padding: 10px;
 }
+/*Fixed validation error message visibility issue*/
+.invalid-feedback{
+    display:block;
+}
 /*End Override Bootbox*/
