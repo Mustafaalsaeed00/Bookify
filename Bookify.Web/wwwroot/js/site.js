@@ -126,9 +126,14 @@ var KTDatatables = function () {
 
 	// Search Datatable --- official docs reference: https://datatables.net/reference/api/search()
 	var handleSearchDatatable = () => {
+		
 		const filterSearch = document.querySelector('[data-kt-filter="search"]');
 		filterSearch.addEventListener('keyup', function (e) {
 			datatable.search(e.target.value).draw();
+
+			//Fixed disable animation during searching
+			lastUpdatedRow = $('.animate__animated');
+			lastUpdatedRow.removeClass('animate__animated animate__flash');
 		});
 	}
 
@@ -221,6 +226,7 @@ $(document).ready(function () {
 							lastupdated.text(UpdatedOn);
 							row.addClass('animate__animated animate__flash');
 							ShowSuccessMessage();
+							
 						},
 						error: function () {
 							ShowErrorMessage();

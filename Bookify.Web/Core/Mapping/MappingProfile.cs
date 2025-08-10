@@ -8,9 +8,14 @@ namespace Bookify.Web.Core.Mapping
 		{
 			//for Mapping Costomization
 			//config.NewConfig<Category, CategoryViewModel>().Map(dest => dest.CategoryName , src=>src.Name);
-
+			//Category
 			config.NewConfig<Category, CategoryViewModel>();
 			config.NewConfig<CategoryFormViewModel, Category>();
+
+
+			//Author
+			config.NewConfig<Author, AuthorViewModel>();
+			config.NewConfig<AuthorFormViewModel, Author>();
 		}
 	}
 }

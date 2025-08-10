@@ -9,7 +9,7 @@ namespace Bookify.Web.Filters
 		{
 			var Request = routeContext.HttpContext.Request;
 			var IsAjax = Request.Headers["x-requested-with"] == "XMLHttpRequest";
-			return IsAjax; 
+			return IsAjax;
 		}
 	}
 }

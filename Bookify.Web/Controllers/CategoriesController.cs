@@ -1,15 +1,9 @@
 ﻿namespace Bookify.Web.Controllers
 {
-	public class CategoriesController : Controller
+	public class CategoriesController(ApplicationDbContext context, IMapper mapper) : Controller
 	{
-		private readonly ApplicationDbContext _context;
-		private readonly IMapper _mapper;
-
-		public CategoriesController(ApplicationDbContext context, IMapper mapper)
-		{
-			_context = context;
-			_mapper = mapper;
-		}
+		private readonly ApplicationDbContext _context = context;
+		private readonly IMapper _mapper = mapper;
 
 		public IActionResult Index()
 		{
@@ -30,7 +24,7 @@
 		[ValidateAntiForgeryToken]
 		public IActionResult Create(CategoryFormViewModel model)
 		{
-			if(!ModelState.IsValid)
+			if (!ModelState.IsValid)
 				return BadRequest();
 
 			var category = _mapper.Map<Category>(model);
@@ -95,7 +89,7 @@
 		public IActionResult AllowItem(CategoryFormViewModel model)
 		{
 			var category = _context.Categories.SingleOrDefault(c => c.Name == model.Name);
-			var IsAllowed = category is null || category.Id.Equals(model.Id); 
+			var IsAllowed = category is null || category.Id.Equals(model.Id);
 			return Json(IsAllowed);
 		}
 	}
