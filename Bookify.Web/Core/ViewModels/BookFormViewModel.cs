@@ -13,15 +13,16 @@ namespace Bookify.Web.Core.ViewModels
 		[MaxLength(200, ErrorMessage = Errors.MaxLength)]
 		public string Publisher { get; set; } = null!;
 		[Display(Name = "Publishing Date")]
-		public DateTime PublishingDate { get; set; }
+		public DateTime PublishingDate { get; set; } = DateTime.Now;
 		public IFormFile? Image { get; set; }
 		[MaxLength(50, ErrorMessage = Errors.MaxLength)]
 		public string Hall { get; set; } = null!;
 		[Display(Name = "Is available for rental?")]
 		public bool IsAvailableForRental { get; set; }
 		public string Description { get; set; } = null!;
+		[Display(Name = "Selected Categories")]
 		public IList<int> SelectedCategories { get; set; } = new List<int>();
-		public IEnumerable<SelectListItem>? Categories { get; set; }
+		public IEnumerable<SelectListItem>? Categories { get; set; } = new List<SelectListItem>();
 
 	}
 }

@@ -21,6 +21,12 @@ body {
   margin-bottom: 60px;
 }
 
+/*Start Override Theme*/
+.form-floating > .form-select {
+    padding-bottom: 0.225rem;
+}
+/*End Override Theme*/
+
 /*Start Override Bootbox*/
 .modal-header border-0 {
     padding: 20px;
