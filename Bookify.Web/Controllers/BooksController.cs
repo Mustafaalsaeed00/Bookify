@@ -131,6 +131,14 @@ namespace Bookify.Web.Controllers
 			return RedirectToAction(nameof(Index));
 		}
 
+		public IActionResult AllowItem(BookFormViewModel model)
+		{
+			var book = _context.Books.SingleOrDefault(b => b.Title == model.Title && b.AuthorId == model.AuthorId);
+			var IsAllowed = book is null || book.Id.Equals(model.Id);
+			return Json(IsAllowed);
+		}
+
+
 		private BookFormViewModel PopulateViewModel(BookFormViewModel? model = null)
 		{
 			BookFormViewModel viewModel = model is null ? new BookFormViewModel() : model;

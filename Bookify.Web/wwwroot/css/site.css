@@ -25,6 +25,11 @@ body {
 .form-floating > .form-select {
     padding-bottom: 0.225rem;
 }
+
+.header-fixed .wrapper {
+    padding-top: 92px;
+    padding-bottom: 40px;
+}
 /*End Override Theme*/
 
 /*Start Override Bootbox*/
