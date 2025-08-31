@@ -5,6 +5,8 @@ using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.Rendering;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
 using Microsoft.Extensions.Options;
+using SixLabors.ImageSharp;
+using SixLabors.ImageSharp.Processing;
 using System.IO;
 using System.Threading.Tasks;
 
@@ -54,7 +56,9 @@ namespace Bookify.Web.Controllers
 
 			/*Save Image To images/books file*/
 
-			var result = await SaveImageToFile(model , SaveMode.Cloud);
+			var saveMode = SaveMode.File;
+
+			var result = await SaveImageToFile(model , saveMode);
 
 			if (!result.Success)
 			{
@@ -62,7 +66,10 @@ namespace Bookify.Web.Controllers
 				return View("Form", PopulateViewModel(model));
 			}
 			if (result.ImageUrl is null)
-				model.ImageUrl = result.ImageName;
+			{
+				model.ImageUrl = $"/images/books/{result.ImageName}";
+				model.ImageThumbnailUrl = $"/images/books/thumb/{result.ImageName}";
+			}
 			else
 			{
 				model.ImageUrl = result.ImageUrl;
@@ -71,8 +78,11 @@ namespace Bookify.Web.Controllers
 			/*Save Image To images/books file*/
 
 			var book = _mapper.Map<Book>(model);
-			book.ImageThumbnailUrl= GetThumbnailUrl(result.ImageUrl);
-			book.ImagePublicId = result.ImagePublicId;
+			if(saveMode == SaveMode.Cloud)
+			{
+				book.ImageThumbnailUrl = GetThumbnailUrl(result.ImageUrl);
+				book.ImagePublicId = result.ImagePublicId;
+			}
 
 			foreach (int categoryId in model.SelectedCategories)
 			{
@@ -115,11 +125,17 @@ namespace Bookify.Web.Controllers
 			//Delete Old image from file
 			if((!string.IsNullOrEmpty(book.ImageUrl)) && model.Image is not null)
 			{
-				//var oldImagePath = Path.Combine(_webHostEnvironment.WebRootPath, "images", "books", book.ImageUrl);
-				//if (System.IO.File.Exists(oldImagePath))
-				//	System.IO.File.Delete(oldImagePath);
+				var oldImagePath = $"{_webHostEnvironment.WebRootPath}{book.ImageUrl}";
+				var oldThumbPath = $"{_webHostEnvironment.WebRootPath}{book.ImageThumbnailUrl}";
 
-				await _cloudinary.DeleteResourcesAsync(book.ImagePublicId);
+
+				if (System.IO.File.Exists(oldImagePath))
+					System.IO.File.Delete(oldImagePath);
+
+				if (System.IO.File.Exists(oldThumbPath))
+					System.IO.File.Delete(oldThumbPath);
+
+				//await _cloudinary.DeleteResourcesAsync(book.ImagePublicId);
 			}
 
 			//Save new Image
@@ -128,7 +144,9 @@ namespace Bookify.Web.Controllers
 			model.ImageUrl = book.ImageUrl;
 
 
-			var result = await SaveImageToFile(model , SaveMode.Cloud);
+			var saveMode = SaveMode.File;
+
+			var result = await SaveImageToFile(model, saveMode);
 
 			if (!result.Success)
 			{
@@ -136,7 +154,10 @@ namespace Bookify.Web.Controllers
 				return View("Form", PopulateViewModel(model));
 			}
 			if (result.ImageUrl is null)
-				model.ImageUrl = result.ImageName;
+			{
+				model.ImageUrl = $"/images/books/{result.ImageName}";
+				model.ImageThumbnailUrl = $"/images/books/thumb/{result.ImageName}";
+			}
 			else
 			{
 				model.ImageUrl = result.ImageUrl;
@@ -148,8 +169,12 @@ namespace Bookify.Web.Controllers
 
 
 			book = _mapper.Map(model, book);
-			book.ImageThumbnailUrl = GetThumbnailUrl(result.ImageUrl);
-			book.ImagePublicId = result.ImagePublicId;
+			if(saveMode == SaveMode.Cloud)
+			{
+				book.ImageThumbnailUrl = GetThumbnailUrl(result.ImageUrl);
+				book.ImagePublicId = result.ImagePublicId;
+			}
+			
 			foreach (int categoryId in model.SelectedCategories)
 			{
 				book.Categories.Add(new BookCategory { CategoryId = categoryId });
@@ -208,8 +233,17 @@ namespace Bookify.Web.Controllers
 				case SaveMode.File:
 					{
 						string path = Path.Combine(_webHostEnvironment.WebRootPath, "images", "books", ImageName);
+						string thumbPath = Path.Combine(_webHostEnvironment.WebRootPath, "images", "books", "thumb", ImageName);
 						using var stream = System.IO.File.Create(path);
 						await model.Image.CopyToAsync(stream);
+						stream.Dispose();
+
+						using var image = Image.Load(model.Image.OpenReadStream());
+						var ratio = (float)image.Width / 200;
+						var height = image.Height / ratio;
+						image.Mutate(i => i.Resize(width: 200, height: (int)height));
+						image.Save(thumbPath);
+
 						ImageUrl = null;
 						ImagePublicId = null;
 					}

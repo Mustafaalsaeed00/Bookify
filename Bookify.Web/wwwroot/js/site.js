@@ -26,8 +26,12 @@ function ShowErrorMessage(message = "Something went wrong!") {
     });
 }
 
+function disableSubmitButton() {
+	$('body :submit').attr('disabled', 'disabled').attr('data-kt-indicator', 'on');
+}
+
 function onModalBegin() {
-	$('body :submit').attr('disabled', 'disabled').attr('data-kt-indicator' , 'on');
+	disableSubmitButton();
 }
 
 function onModalSuccess(row) {
@@ -154,16 +158,35 @@ var KTDatatables = function () {
 }();
 
 $(document).ready(function () {
+	//disable sumbit button
+	$('form').on('submit', function () {
+		if ($('.js-tinymce').length > 0) {
+			$('.js-tinymce').each(function () {
+				var input = $(this);
+				var content = tinyMCE.get(input.attr('id')).getContent();
+				input.val(content);
+			})
+		}
+
+		var isValid = $(this).valid();
+		if (isValid) disableSubmitButton();
+	})
+
 
 	//tinymce
-	var options = { selector: ".js-tinymce", height: "435" };
+	if ($('.js-tinymce').length > 0) {
+		var options = { selector: ".js-tinymce", height: "443" };
 
-	if (KTThemeMode.getMode() === "dark") {
-		options["skin"] = "oxide-dark";
-		options["content_css"] = "dark";
+		if (KTThemeMode.getMode() === "dark") {
+			options["skin"] = "oxide-dark";
+			options["content_css"] = "dark";
+		}
+
+		tinymce.init(options);
 	}
 
-	tinymce.init(options);
+
+	
 
 	//date picker
 	$('.js-datepicker').daterangepicker({
@@ -175,6 +198,9 @@ $(document).ready(function () {
 	});
 	//select2
 	$('.js-select2').select2();
+	$('.js-select2').on('select2:select', function (e) {
+		$('form').validate().element('#' + $(this).attr('id'));
+	});
 
 	//Sweet alerts
     var message = $('#Message').text();
