@@ -42,6 +42,22 @@ namespace Bookify.Web.Controllers
 			return View();
 		}
 
+		public IActionResult Details(int id)
+		{
+			var book = _context.Books
+				.Include(b=> b.Author)
+				.Include(b=> b.Categories)
+				.ThenInclude(c=> c.Category)
+				.SingleOrDefault(b => b.Id == id);
+
+			if (book is null)
+				return NotFound();
+
+			var viewModel = _mapper.Map<BookViewModel>(book);
+				
+			return View(viewModel);
+		}
+
 		public IActionResult Create()
 		{
 			return View("Form" , PopulateViewModel());
@@ -92,7 +108,7 @@ namespace Bookify.Web.Controllers
 			_context.Add(book);
 			_context.SaveChanges();
 
-			return RedirectToAction(nameof(Index));
+			return RedirectToAction(nameof(Details) , new { id = book.Id});
 		}
 
 		public IActionResult Edit(int id)
@@ -142,6 +158,7 @@ namespace Bookify.Web.Controllers
 
 			//handle if user did not add new image
 			model.ImageUrl = book.ImageUrl;
+			model.ImageThumbnailUrl = book.ImageThumbnailUrl;
 
 
 			var saveMode = SaveMode.File;
@@ -153,12 +170,12 @@ namespace Bookify.Web.Controllers
 				ModelState.AddModelError(nameof(model.Image), result.ErrorMessage);
 				return View("Form", PopulateViewModel(model));
 			}
-			if (result.ImageUrl is null)
+			if (result.ImageUrl is null && result.ImageName is not null)
 			{
 				model.ImageUrl = $"/images/books/{result.ImageName}";
 				model.ImageThumbnailUrl = $"/images/books/thumb/{result.ImageName}";
 			}
-			else
+			else if(result.ImageUrl is not null)
 			{
 				model.ImageUrl = result.ImageUrl;
 			}
@@ -183,7 +200,7 @@ namespace Bookify.Web.Controllers
 			book.LastUpdatedOn = DateTime.Now;
 			_context.SaveChanges();
 
-			return RedirectToAction(nameof(Index));
+			return RedirectToAction(nameof(Details), new { id = book.Id });
 		}
 
 		public IActionResult AllowItem(BookFormViewModel model)

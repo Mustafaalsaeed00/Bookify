@@ -25,7 +25,9 @@ namespace Bookify.Web.Core.Mapping
 
 			//Books
 			config.NewConfig<BookFormViewModel, Book>();
-
+			config.NewConfig<Book, BookViewModel>()
+				.Map(dest => dest.Author, src => src.Author!.Name)
+				.Map(dest => dest.Categories, src => src.Categories.Select(c => c.Category!.Name).ToList());
 		}
 	}
 }
