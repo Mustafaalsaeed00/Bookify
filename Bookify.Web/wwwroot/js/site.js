@@ -73,6 +73,9 @@ var KTDatatables = function () {
 		datatable = $(table).DataTable({
 			"info": false,
 			'pageLength': 10,
+			//'drawCallback': function () {
+			//	KTMenu.createInstances();
+			//}
 		});
 	}
 
@@ -135,7 +138,7 @@ var KTDatatables = function () {
 		filterSearch.addEventListener('keyup', function (e) {
 			datatable.search(e.target.value).draw();
 
-			//Fixed disable animation during searching
+			//disable animation during searching in authors and categories
 			lastUpdatedRow = $('.animate__animated');
 			lastUpdatedRow.removeClass('animate__animated animate__flash');
 		});
@@ -244,7 +247,8 @@ $(document).ready(function () {
 	//Handle Toggle Status
 	$("body").delegate('.js-toggle-status', "click", function () {
 		var btn = $(this);
-
+		var row = btn.parents('tr');
+		row.removeClass('animate__animated animate__flash');
 		bootbox.confirm({
 			message: 'Are you sure!',
 			centerVertical: true,
@@ -266,7 +270,7 @@ $(document).ready(function () {
 							"__RequestVerificationToken": $('input[name="__RequestVerificationToken"]').val()
 						},
 						success: function (UpdatedOn) {
-							var row = btn.parents('tr');
+							
 							var status = row.find('.js-status');
 							var newStatus = status.text().trim() === 'Deleted' ? 'Available' : 'Deleted';
 							status.text(newStatus).toggleClass('badge-light-danger badge-light-success');
