@@ -270,7 +270,6 @@ $(document).ready(function () {
 							"__RequestVerificationToken": $('input[name="__RequestVerificationToken"]').val()
 						},
 						success: function (UpdatedOn) {
-							
 							var status = row.find('.js-status');
 							var newStatus = status.text().trim() === 'Deleted' ? 'Available' : 'Deleted';
 							status.text(newStatus).toggleClass('badge-light-danger badge-light-success');

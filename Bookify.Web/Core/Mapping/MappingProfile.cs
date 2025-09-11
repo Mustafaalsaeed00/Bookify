@@ -28,6 +28,11 @@ namespace Bookify.Web.Core.Mapping
 			config.NewConfig<Book, BookViewModel>()
 				.Map(dest => dest.Author, src => src.Author!.Name)
 				.Map(dest => dest.Categories, src => src.Categories.Select(c => c.Category!.Name).ToList());
+
+			//BookCopies
+			config.NewConfig<BookCopy, BookCopyViewModel>()
+				.Map(dest => dest.BookTitle, src => src.Book!.Title);
+			config.NewConfig<BookCopyFormViewModel, BookCopy>();
 		}
 	}
 }
