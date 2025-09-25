@@ -1,9 +1,18 @@
-﻿namespace Bookify.Web.Controllers
+﻿using System.Security.Claims;
+
+namespace Bookify.Web.Controllers
 {
-	public class AuthorsController(ApplicationDbContext context, IMapper mapper) : Controller
+	[Authorize(Roles = AppRoles.Archive)]
+	public class AuthorsController : Controller
 	{
-		private readonly ApplicationDbContext _context = context;
-		private readonly IMapper _mapper = mapper;
+		private readonly ApplicationDbContext _context ;
+		private readonly IMapper _mapper;
+
+		public AuthorsController(ApplicationDbContext context, IMapper mapper = null)
+		{
+			_context = context;
+			_mapper = mapper;
+		}
 
 		public IActionResult Index()
 		{
@@ -27,6 +36,7 @@
 				return BadRequest();
 
 			var author = _mapper.Map<Author>(model);
+			author.CreatedById = User.FindFirst(ClaimTypes.NameIdentifier)!.Value;
 			_context.Add(author);
 
 			_context.SaveChanges();
@@ -60,6 +70,7 @@
 				return BadRequest();
 
 			author = _mapper.Map(model, author);
+			author.LastUpdatedById = User.FindFirst(ClaimTypes.NameIdentifier)!.Value;
 			author.LastUpdatedOn = DateTime.Now;
 
 			_context.SaveChanges();
@@ -78,6 +89,7 @@
 				return NotFound();
 
 			author.IsDeleted = !author.IsDeleted;
+			author.LastUpdatedById = User.FindFirst(ClaimTypes.NameIdentifier)!.Value;
 			author.LastUpdatedOn = DateTime.Now;
 
 			_context.SaveChanges();

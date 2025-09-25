@@ -33,6 +33,14 @@ namespace Bookify.Web.Core.Mapping
 			config.NewConfig<BookCopy, BookCopyViewModel>()
 				.Map(dest => dest.BookTitle, src => src.Book!.Title);
 			config.NewConfig<BookCopyFormViewModel, BookCopy>();
+
+			//Users
+			config.NewConfig<ApplicationUser , UserViewModel>()
+			.Map(dest => dest.Username, src => src.UserName);
+			config.NewConfig<UserFormViewModel , ApplicationUser>()
+				.Map(dest => dest.NormalizedEmail, src => src.Email.ToUpper())
+				.Map(dest => dest.NormalizedUserName, src => src.UserName.ToUpper());
+				
 		}
 	}
 }

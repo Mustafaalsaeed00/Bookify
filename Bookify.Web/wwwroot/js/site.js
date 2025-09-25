@@ -17,8 +17,8 @@ function ShowSuccessMessage(message = "Saved Successfully!") {
 function ShowErrorMessage(message = "Something went wrong!") {
     Swal.fire({
         icon: "error",
-        title: "Oops...",
-        text: message,
+		title: "Oops...",
+		text: message.responseText != undefined ? message.responseText : message,
         customClass: {
 			confirmButton: "btn btn-primary"
         }
@@ -38,8 +38,8 @@ function onModalSuccess(row) {
     ShowSuccessMessage()
     var modal = $('#Modal');
 	modal.modal('hide');
-
 	if (updatedRow !== undefined) {
+		
 		datatable.row(updatedRow).remove().draw();
 		updatedRow = undefined;
 	}
@@ -51,8 +51,16 @@ function onModalSuccess(row) {
     KTMenu.initHandlers();
 }
 
+function ApplaySelect2() {
+	$('.js-select2').select2();
+	$('.js-select2').on('select2:select', function (e) {
+		$('form').not("#SignOut").validate().element('#' + $(this).attr('id'));
+	});
+}
+
 function onModalComplete() {
 	$('body :submit').removeAttr('disabled');
+	
 }
 //DataTables
 var headers = $('th');
@@ -162,7 +170,7 @@ var KTDatatables = function () {
 
 $(document).ready(function () {
 	//disable sumbit button
-	$('form').on('submit', function () {
+	$('form').not("#SignOut").on('submit', function () {
 		if ($('.js-tinymce').length > 0) {
 			$('.js-tinymce').each(function () {
 				var input = $(this);
@@ -200,10 +208,7 @@ $(document).ready(function () {
 		maxDate: new Date(),
 	});
 	//select2
-	$('.js-select2').select2();
-	$('.js-select2').on('select2:select', function (e) {
-		$('form').validate().element('#' + $(this).attr('id'));
-	});
+	ApplaySelect2();
 
 	//Sweet alerts
     var message = $('#Message').text();
@@ -219,21 +224,24 @@ $(document).ready(function () {
 
 
     //Handle bootstrap modal
-    $('body').delegate('.js-render-modal','click', function () {
-        var btn = $(this);
+	$('body').delegate('.js-render-modal', 'click', function () {
+		
+		var btn = $(this);
+
         var modal = $('#Modal');
         modal.find('#ModalLabel').text(btn.data('title'));
-
-        if (btn.data('update') !== undefined) {
+		
+		if (btn.data('update') !== undefined) {
             updatedRow = btn.parents('tr');
         }
 
         $.get({
             
-            url: btn.data('url'),
+			url: btn.data('url'),
             success: function (form) {
                 modal.find('.modal-body').html(form);
-                $.validator.unobtrusive.parse(modal);
+				$.validator.unobtrusive.parse(modal);
+				ApplaySelect2();
             },
             error: function () {
                 ShowErrorMessage();
@@ -289,5 +297,50 @@ $(document).ready(function () {
 
 
 	});
+
+	//Handle logOut Form
+
+	$(".js-signout").on('click', function () {
+		$('#SignOut').submit();
+	});
+
+	//Handle Unlock User
+	$('body').delegate('.js-confirm' , 'click', function () {
+		var btn = $(this);
+		bootbox.confirm({
+			message: btn.data('message'),
+			centerVertical: true,
+			buttons: {
+				confirm: {
+					label: 'Yes',
+					className: 'btn-sm btn-primary'
+				},
+				cancel: {
+					label: 'No',
+					className: 'btn-sm btn-secondary'
+				}
+			},
+			callback: function (result) {
+				if (result) {
+
+					$.post({
+						url: btn.data('url'),
+						data: {
+							"__RequestVerificationToken": $('input[name="__RequestVerificationToken"]').val()
+						},
+						success: function () {
+							btn.remove();
+							ShowSuccessMessage();
+						},
+						error: function () {
+							ShowErrorMessage();
+						}
+					});
+				}
+			}
+		});
+
+	
+	})
 
 });

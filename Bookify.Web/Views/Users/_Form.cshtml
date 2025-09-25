@@ -1,0 +1,68 @@
+﻿@model UserFormViewModel
+
+<form asp-action=@(!string.IsNullOrEmpty(Model.Id) ? "Edit" : "Create")
+      data-ajax-method="post"
+      data-ajax="true"
+      data-ajax-begin="onModalBegin"
+      data-ajax-success="onModalSuccess"
+      data-ajax-failure="ShowErrorMessage"
+      data-ajax-complete="onModalComplete">
+    @if (!string.IsNullOrEmpty(Model.Id))
+    {
+        <input type="hidden" asp-for="Id" />
+
+    }
+    <div class="mb-5">
+        <div class="form-floating mb-2">
+            <input type="text" class="form-control form-control-solid" placeholder="FullName" asp-for="FullName" />
+            <label asp-for="FullName"></label>
+        </div>
+        <span asp-validation-for="FullName" class="text-danger"></span>
+    </div>
+    <div class="mb-5">
+        <div class="form-floating mb-2">
+            <input type="text" class="form-control form-control-solid" placeholder="Username" asp-for="UserName" />
+            <label asp-for="UserName"></label>
+        </div>
+        <span asp-validation-for="UserName" class="text-danger"></span>
+    </div>
+    <div class="mb-5">
+        <div class="form-floating mb-2">
+            <input type="email" class="form-control form-control-solid" placeholder="Email" asp-for="Email" />
+            <label asp-for="Email"></label>
+        </div>
+        <span asp-validation-for="Email" class="text-danger"></span>
+    </div>
+    <div class="mb-5">
+        <div class="form-floating">
+            <select class="form-select form-select-solid js-select2" data-placeholder="Select Roles" asp-for="SelectedRoles" asp-items="Model.Roles">
+                <option value="">Select Roles</option>
+            </select>
+            <label asp-for="SelectedRoles"></label>
+        </div>
+        <span asp-validation-for="SelectedRoles" class="text-danger"></span>
+    </div>
+    @if (string.IsNullOrEmpty(Model.Id))
+    {
+        <div class="mb-5">
+            <div class="form-floating mb-2">
+                <input type="text" class="form-control form-control-solid" placeholder="Password" asp-for="Password" />
+                <label asp-for="Password"></label>
+            </div>
+            <span asp-validation-for="Password" class="text-danger"></span>
+        </div>
+        <div class="mb-5">
+            <div class="form-floating mb-2">
+                <input type="text" class="form-control form-control-solid" placeholder="Confirm Password" asp-for="ConfirmPassword" />
+                <label asp-for="ConfirmPassword"></label>
+            </div>
+            <span asp-validation-for="ConfirmPassword" class="text-danger"></span>
+        </div>
+    }
+    <partial name="_ModalFooter" />
+</form>
+
+@section Scripts {
+
+    <partial name="_validationscriptspartial"></partial>
+}

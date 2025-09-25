@@ -10,10 +10,12 @@ using SixLabors.ImageSharp.Processing;
 using System.IO;
 using System.Linq;
 using System.Linq.Dynamic.Core;
+using System.Security.Claims;
 using System.Threading.Tasks;
 
 namespace Bookify.Web.Controllers
 {
+	[Authorize(Roles = AppRoles.Archive)]
 	public class BooksController : Controller
 	{
 		private readonly IWebHostEnvironment _webHostEnvironment;
@@ -140,7 +142,9 @@ var skip = int.Parse(Request.Form["start"]!);
 			{
 				book.Categories.Add(new BookCategory { CategoryId = categoryId });
 			}
-			
+
+			book.CreatedById = User.FindFirst(ClaimTypes.NameIdentifier)!.Value;
+
 			_context.Add(book);
 			_context.SaveChanges();
 
@@ -167,7 +171,10 @@ var skip = int.Parse(Request.Form["start"]!);
 			if (!ModelState.IsValid)
 				return View("Form", PopulateViewModel(model));
 
-			var book = _context.Books.Include(b => b.Categories).FirstOrDefault(b => b.Id == model.Id);
+			var book = _context.Books
+				.Include(b => b.Categories)
+				.Include(b => b.Copies)
+				.FirstOrDefault(b => b.Id == model.Id);
 
 			if (book is null)
 				return NotFound();
@@ -234,6 +241,13 @@ var skip = int.Parse(Request.Form["start"]!);
 			}
 
 			book.LastUpdatedOn = DateTime.Now;
+			book.LastUpdatedById = User.FindFirst(ClaimTypes.NameIdentifier)!.Value;
+
+			if(!book.IsAvailableForRental)
+			{
+				foreach (var copy in book.Copies)
+					copy.IsAvailableForRental = false;
+			}
 			_context.SaveChanges();
 
 			return RedirectToAction(nameof(Details), new { id = book.Id });
@@ -250,6 +264,7 @@ var skip = int.Parse(Request.Form["start"]!);
 
 			book.IsDeleted = !book.IsDeleted;
 			book.LastUpdatedOn = DateTime.Now;
+			book.LastUpdatedById = User.FindFirst(ClaimTypes.NameIdentifier)!.Value;
 
 			_context.SaveChanges();
 

@@ -1,7 +1,11 @@
+using Bookify.Web.Seeds;
 using Mapster;
 using Microsoft.AspNetCore.Identity;
 using System.Reflection;
 using UoN.ExpressiveAnnotations.NetCore.DependencyInjection;
+using Bookify.Web.Data;
+using Microsoft.EntityFrameworkCore;
+using Bookify.Web.Helpers;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -9,18 +13,35 @@ var builder = WebApplication.CreateBuilder(args);
 var connectionString = builder.Configuration.GetConnectionString("DefaultConnection") ?? throw new InvalidOperationException("Connection string 'DefaultConnection' not found.");
 builder.Services.AddDbContext<ApplicationDbContext>(options =>
 	options.UseSqlServer(connectionString));
+
 builder.Services.AddDatabaseDeveloperPageExceptionFilter();
 
-builder.Services.AddDefaultIdentity<IdentityUser>(options => options.SignIn.RequireConfirmedAccount = true)
-	.AddEntityFrameworkStores<ApplicationDbContext>();
+//builder.Services.AddDefaultIdentity<ApplicationUser>(options => options.SignIn.RequireConfirmedAccount = true)
+//	.AddEntityFrameworkStores<ApplicationDbContext>();
+
+builder.Services.AddIdentity<ApplicationUser, IdentityRole>(options => options.SignIn.RequireConfirmedAccount = true)
+	.AddEntityFrameworkStores<ApplicationDbContext>()
+	.AddDefaultUI()
+	.AddDefaultTokenProviders();
+
+builder.Services.Configure<IdentityOptions>(options =>
+{
+	options.Password.RequiredLength = 8;
+	options.User.RequireUniqueEmail = true;
+	options.Lockout.MaxFailedAccessAttempts = 1;
+});
+
+
+builder.Services.AddScoped<IUserClaimsPrincipalFactory<ApplicationUser>, ApplicationUserClaimsPrincipalFactory>();
+
 builder.Services.AddControllersWithViews();
 builder.Services.AddExpressiveAnnotations();
 builder.Services.Configure<CloudinarySettings>(builder.Configuration.GetSection(nameof(CloudinarySettings)));
-// ÅÚÏÇÏ Mapster
+// ï¿½ï¿½ï¿½ï¿½ï¿½ Mapster
 var config = TypeAdapterConfig.GlobalSettings;
 config.Scan(Assembly.GetExecutingAssembly());
 
-// ÊÓÌíá ÇáÅÚÏÇÏÇÊ Ýí DI
+// ï¿½ï¿½ï¿½ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ ï¿½ï¿½ DI
 builder.Services.AddSingleton(config);
 builder.Services.AddScoped<IMapper, ServiceMapper>();
 
@@ -44,7 +65,19 @@ app.UseStaticFiles();
 
 app.UseRouting();
 
+app.UseAuthentication();
 app.UseAuthorization();
+
+var scopeFactory = app.Services.GetRequiredService<IServiceScopeFactory>();
+var scope = scopeFactory.CreateScope();
+
+
+var roleManager = scope.ServiceProvider.GetRequiredService<RoleManager<IdentityRole>>();
+var userManager = scope.ServiceProvider.GetRequiredService<UserManager<ApplicationUser>>();
+
+
+await DefaultRoles.SeedAsync(roleManager);
+await DefaultUsers.SeedAdminUserAsync(userManager);
 
 app.MapControllerRoute(
 	name: "default",
