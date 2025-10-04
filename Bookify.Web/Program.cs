@@ -6,6 +6,8 @@ using UoN.ExpressiveAnnotations.NetCore.DependencyInjection;
 using Bookify.Web.Data;
 using Microsoft.EntityFrameworkCore;
 using Bookify.Web.Helpers;
+using Bookify.Web.Services;
+using Microsoft.AspNetCore.Identity.UI.Services;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -28,15 +30,20 @@ builder.Services.Configure<IdentityOptions>(options =>
 {
 	options.Password.RequiredLength = 8;
 	options.User.RequireUniqueEmail = true;
-	options.Lockout.MaxFailedAccessAttempts = 1;
 });
 
-
+builder.Services.Configure<SecurityStampValidatorOptions>(options =>
+options.ValidationInterval = TimeSpan.Zero);
 builder.Services.AddScoped<IUserClaimsPrincipalFactory<ApplicationUser>, ApplicationUserClaimsPrincipalFactory>();
+builder.Services.AddTransient<IImageService, ImageService>();
+builder.Services.AddTransient<IImageStorage, FileSystemImageStorage>();
+builder.Services.AddTransient<IEmailSender, EmailSender>();
+builder.Services.AddTransient<IEmailBodyBuilder, EmailBodyBuilder>();
 
 builder.Services.AddControllersWithViews();
 builder.Services.AddExpressiveAnnotations();
 builder.Services.Configure<CloudinarySettings>(builder.Configuration.GetSection(nameof(CloudinarySettings)));
+builder.Services.Configure<MailSettings>(builder.Configuration.GetSection(nameof(MailSettings)));
 // ����� Mapster
 var config = TypeAdapterConfig.GlobalSettings;
 config.Scan(Assembly.GetExecutingAssembly());

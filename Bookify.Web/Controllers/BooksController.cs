@@ -1,4 +1,6 @@
-﻿using Bookify.Web.Core.Models;
+﻿using Bookify.Web.Core.Consts;
+using Bookify.Web.Core.Models;
+using Bookify.Web.Services;
 using CloudinaryDotNet;
 using CloudinaryDotNet.Actions;
 using Microsoft.AspNetCore.Mvc;
@@ -12,33 +14,22 @@ using System.Linq;
 using System.Linq.Dynamic.Core;
 using System.Security.Claims;
 using System.Threading.Tasks;
+using static System.Reflection.Metadata.BlobBuilder;
 
 namespace Bookify.Web.Controllers
 {
 	[Authorize(Roles = AppRoles.Archive)]
 	public class BooksController : Controller
 	{
-		private readonly IWebHostEnvironment _webHostEnvironment;
 		private readonly ApplicationDbContext _context;
 		private readonly IMapper _mapper;
-		private readonly Cloudinary _cloudinary;
-		private List<string> _allowedExtensions = new() {".jpg" , ".jpeg", ".png" };
-		private int _maxAllowedSize = 2076672;
-		public BooksController(ApplicationDbContext context, IMapper mapper, IWebHostEnvironment webHostEnvironment, IOptions<CloudinarySettings> cloudinary)
+		private readonly IImageService _imageService;
+
+		public BooksController(ApplicationDbContext context, IMapper mapper, IImageService imageService)
 		{
 			_context = context;
 			_mapper = mapper;
-			_webHostEnvironment = webHostEnvironment;
-			Account account = new()
-			{
-				Cloud = cloudinary.Value.Cloud,
-				ApiKey = cloudinary.Value.ApiKey,
-				ApiSecret = cloudinary.Value.ApiSecret,
-			};
-
-
-
-			_cloudinary = new Cloudinary(account);
+			_imageService = imageService;
 		}
 
 		public IActionResult Index()
@@ -49,7 +40,7 @@ namespace Bookify.Web.Controllers
 		[HttpPost]
 		public IActionResult GetBooks()
 		{
-var skip = int.Parse(Request.Form["start"]!);
+			var skip = int.Parse(Request.Form["start"]!);
 			var pageSize = int.Parse(Request.Form["length"]!);
 
 			var searchValue = Request.Form["search[value]"];
@@ -107,34 +98,41 @@ var skip = int.Parse(Request.Form["start"]!);
 			if (!ModelState.IsValid)
 				return View("Form", PopulateViewModel(model));
 
-
+			(bool isUploaded, string? errorMessage, string? imageUrl, string? ImagePublicId) result = new();
 			/*Save Image To images/books file*/
-
-			var saveMode = SaveMode.File;
-
-			var result = await SaveImageToFile(model , saveMode);
-
-			if (!result.Success)
+			if (model.Image is not null)
 			{
-				ModelState.AddModelError(nameof(model.Image), result.ErrorMessage);
-				return View("Form", PopulateViewModel(model));
-			}
-			if (result.ImageUrl is null)
-			{
-				model.ImageUrl = $"/images/books/{result.ImageName}";
-				model.ImageThumbnailUrl = $"/images/books/thumb/{result.ImageName}";
-			}
-			else
-			{
-				model.ImageUrl = result.ImageUrl;
+				string extension = Path.GetExtension(model.Image.FileName);
+				string ImageName = $"{Guid.NewGuid()}{extension}";
 
+				result = await _imageService.UploadAsync(model.Image , ImageName , "/images/books" , true);
+
+				if (!result.isUploaded)
+				{
+					ModelState.AddModelError(nameof(model.Image), result.errorMessage!);
+					return View("Form", PopulateViewModel(model));
+				}
+
+				if(result.imageUrl is null && result.ImagePublicId is null)
+				{
+					model.ImageUrl = $"/images/books/{ImageName}";
+					model.ImageThumbnailUrl = $"/images/books/thumb/{ImageName}";
+				}
+				else
+				{
+					model.ImageUrl = result.imageUrl;
+					model.ImageThumbnailUrl = GetThumbnailUrl(result.imageUrl!);
+				}
 			}
+
+
+		
 			/*Save Image To images/books file*/
 
 			var book = _mapper.Map<Book>(model);
-			if(saveMode == SaveMode.Cloud)
+
+			if(result.ImagePublicId is not null)
 			{
-				book.ImageThumbnailUrl = GetThumbnailUrl(result.ImageUrl);
 				book.ImagePublicId = result.ImagePublicId;
 			}
 
@@ -184,57 +182,46 @@ var skip = int.Parse(Request.Form["start"]!);
 			//Delete Old image from file
 			if((!string.IsNullOrEmpty(book.ImageUrl)) && model.Image is not null)
 			{
-				var oldImagePath = $"{_webHostEnvironment.WebRootPath}{book.ImageUrl}";
-				var oldThumbPath = $"{_webHostEnvironment.WebRootPath}{book.ImageThumbnailUrl}";
-
-
-				if (System.IO.File.Exists(oldImagePath))
-					System.IO.File.Delete(oldImagePath);
-
-				if (System.IO.File.Exists(oldThumbPath))
-					System.IO.File.Delete(oldThumbPath);
-
-				//await _cloudinary.DeleteResourcesAsync(book.ImagePublicId);
+				await _imageService.DeleteAsync(book.ImageUrl, imageThumbnail: true);
 			}
 
 			//Save new Image
 
 			//handle if user did not add new image
-			model.ImageUrl = book.ImageUrl;
-			model.ImageThumbnailUrl = book.ImageThumbnailUrl;
 
+			(bool isUploaded, string? errorMessage, string? imageUrl, string? ImagePublicId) result = new();
 
-			var saveMode = SaveMode.File;
+			string extension = Path.GetExtension(model.Image.FileName);
+			string ImageName = $"{Guid.NewGuid()}{extension}";
 
-			var result = await SaveImageToFile(model, saveMode);
+			result = await _imageService.UploadAsync(model.Image, ImageName, "/images/books", true);
 
-			if (!result.Success)
+			if (!result.isUploaded)
 			{
-				ModelState.AddModelError(nameof(model.Image), result.ErrorMessage);
+				ModelState.AddModelError(nameof(model.Image), result.errorMessage!);
 				return View("Form", PopulateViewModel(model));
 			}
-			if (result.ImageUrl is null && result.ImageName is not null)
-			{
-				model.ImageUrl = $"/images/books/{result.ImageName}";
-				model.ImageThumbnailUrl = $"/images/books/thumb/{result.ImageName}";
-			}
-			else if(result.ImageUrl is not null)
-			{
-				model.ImageUrl = result.ImageUrl;
-			}
 
-
+			if (result.imageUrl is null && result.ImagePublicId is null)
+			{
+				model.ImageUrl = $"/images/books/{ImageName}";
+				model.ImageThumbnailUrl = $"/images/books/thumb/{ImageName}";
+			}
+			else
+			{
+				model.ImageUrl = result.imageUrl;
+				model.ImageThumbnailUrl = GetThumbnailUrl(result.imageUrl!);
+			}
 			/*Save Image To images/books file*/
 
 
 
 			book = _mapper.Map(model, book);
-			if(saveMode == SaveMode.Cloud)
+			if (result.ImagePublicId is not null)
 			{
-				book.ImageThumbnailUrl = GetThumbnailUrl(result.ImageUrl);
 				book.ImagePublicId = result.ImagePublicId;
 			}
-			
+
 			foreach (int categoryId in model.SelectedCategories)
 			{
 				book.Categories.Add(new BookCategory { CategoryId = categoryId });
@@ -292,69 +279,6 @@ var skip = int.Parse(Request.Form["start"]!);
 		
 			return viewModel;
 		}
-
-		public enum SaveMode { File , Cloud};
-
-		private async Task<(bool Success , string ErrorMessage , string? ImageName ,string? ImageUrl,string? ImagePublicId)> SaveImageToFile(BookFormViewModel model , SaveMode saveMode)
-		{
-			if (model.Image is null)
-				return (true, string.Empty, null , null , null);
-
-
-			string extension = Path.GetExtension(model.Image.FileName);
-
-			if (!_allowedExtensions.Contains(extension))
-				return (false, Errors.AllowedExtensions, null,null, null);
-
-
-			if (model.Image.Length > _maxAllowedSize)
-				return (false, Errors.MaxSize, null,null, null);
-
-			string ImageName = $"{Guid.NewGuid()}{extension}";
-			var ImageUrl = "";
-			var ImagePublicId = "";
-			switch (saveMode)
-			{
-				case SaveMode.File:
-					{
-						string path = Path.Combine(_webHostEnvironment.WebRootPath, "images", "books", ImageName);
-						string thumbPath = Path.Combine(_webHostEnvironment.WebRootPath, "images", "books", "thumb", ImageName);
-						using var stream = System.IO.File.Create(path);
-						await model.Image.CopyToAsync(stream);
-						stream.Dispose();
-
-						using var image = Image.Load(model.Image.OpenReadStream());
-						var ratio = (float)image.Width / 200;
-						var height = image.Height / ratio;
-						image.Mutate(i => i.Resize(width: 200, height: (int)height));
-						image.Save(thumbPath);
-
-						ImageUrl = null;
-						ImagePublicId = null;
-					}
-					break;
-				case SaveMode.Cloud:
-					{
-						using var stream = model.Image.OpenReadStream();
-
-						var imageParams = new ImageUploadParams
-						{
-							File = new FileDescription(ImageName, stream),
-							UseFilename = true
-						};
-						var result = await _cloudinary.UploadAsync(imageParams);
-
-						ImageUrl = result.SecureUrl.ToString();
-
-						ImagePublicId = result.PublicId;
-					}
-					break;
-					
-			}
-			
-			return (true, string.Empty, ImageName , ImageUrl , ImagePublicId);
-		}
-
 		private string GetThumbnailUrl(string url)
 		{
 			var separator = "image/upload/";

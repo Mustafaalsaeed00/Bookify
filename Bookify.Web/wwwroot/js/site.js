@@ -227,7 +227,6 @@ $(document).ready(function () {
 	$('body').delegate('.js-render-modal', 'click', function () {
 		
 		var btn = $(this);
-
         var modal = $('#Modal');
         modal.find('#ModalLabel').text(btn.data('title'));
 		
