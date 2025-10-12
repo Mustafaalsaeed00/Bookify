@@ -35,7 +35,7 @@ namespace Bookify.Web.Services
 			return (true, null , ImageUrl , ImagePublicId);
 		}
 
-		public async Task DeleteAsync(string imageUrl, bool? imageThumbnail)
+		public async Task DeleteAsync(string imageUrl, string? imageThumbnail = null)
 		{
 			await _imageStorage.DeleteAsync(imageUrl, imageThumbnail);
 		}

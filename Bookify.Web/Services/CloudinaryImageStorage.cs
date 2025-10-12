@@ -45,10 +45,10 @@ namespace Bookify.Web.Services
 			return (ImageUrl, ImagePublicId);
 		}
 
-		public async Task DeleteAsync(string imageUrl, bool? imageThumbnail)
+		public async Task DeleteAsync(string imageUrl, string? imageThumbnail)
 		{
 			var publicId = ExtractPublicId(imageUrl);
-			await _cloudinary.DeleteResourcesAsync(publicId);
+			 await _cloudinary.DeleteResourcesAsync(publicId);
 		}
 
 		string ExtractPublicId(string imageUrl)

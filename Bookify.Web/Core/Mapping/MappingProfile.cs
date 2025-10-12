@@ -40,7 +40,27 @@ namespace Bookify.Web.Core.Mapping
 			config.NewConfig<UserFormViewModel , ApplicationUser>()
 				.Map(dest => dest.NormalizedEmail, src => src.Email.ToUpper())
 				.Map(dest => dest.NormalizedUserName, src => src.UserName.ToUpper());
-				
+
+			//Governorates
+			config.NewConfig<Governorate, SelectListItem>()
+				.Map(dest => dest.Text, src => src.Name)
+				.Map(dest => dest.Value, src => src.Id);
+
+			//Areas
+			config.NewConfig<Area, SelectListItem>()
+				.Map(dest => dest.Text, src => src.Name)
+				.Map(dest => dest.Value, src => src.Id);
+
+			//Subscribers
+			config.NewConfig<Subscriber, SubscriberFormViewModel>();
+			config.NewConfig<Subscriber, SubscriberSearchResultViewModel>()
+				.Map(dest => dest.FullName, src => $"{src.FirstName} {src.LastName}");
+			config.NewConfig<Subscriber, SubscriberDetailsViewModel>()
+				.Map(dest => dest.FullName, src => $"{src.FirstName} {src.LastName}")
+				.Map(dest => dest.Governorate, src => src.Governorate!.Name)
+				.Map(dest => dest.Area, src => src.Area!.Name);
+
+
 		}
 	}
 }

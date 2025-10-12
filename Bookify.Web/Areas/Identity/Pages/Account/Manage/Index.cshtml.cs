@@ -119,7 +119,7 @@ namespace Bookify.Web.Areas.Identity.Pages.Account.Manage
 
             if (Input.Avatar is not null)
             {
-                await _imageService.DeleteAsync($"/images/users/{user.Id}.png" , imageThumbnail: false);
+                await _imageService.DeleteAsync($"/images/users/{user.Id}.png");
 				var result = await _imageService.UploadAsync(Input.Avatar, $"{user.Id}.png", "/images/users", hasThumbnail: false);
 
                 if(!result.isUploaded)
@@ -130,7 +130,7 @@ namespace Bookify.Web.Areas.Identity.Pages.Account.Manage
 				}
 
 			}else if(Input.ImageRemoved)
-				await _imageService.DeleteAsync($"/images/users/{user.Id}.png", imageThumbnail: false);
+				await _imageService.DeleteAsync($"/images/users/{user.Id}.png");
 
 
 			var phoneNumber = await _userManager.GetPhoneNumberAsync(user);

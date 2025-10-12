@@ -182,7 +182,7 @@ namespace Bookify.Web.Controllers
 			//Delete Old image from file
 			if((!string.IsNullOrEmpty(book.ImageUrl)) && model.Image is not null)
 			{
-				await _imageService.DeleteAsync(book.ImageUrl, imageThumbnail: true);
+				await _imageService.DeleteAsync(book.ImageUrl);
 			}
 
 			//Save new Image

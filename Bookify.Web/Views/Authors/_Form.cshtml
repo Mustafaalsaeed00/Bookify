@@ -2,8 +2,7 @@
 <form  asp-action=@(Model?.Id > 0 ? "Edit" : "Create")
     data-ajax-method="post"
     data-ajax ="true"
-
-    data-ajax-begin="onModalBegin"
+    data-ajax-begin="disableSubmitButton"
     data-ajax-success="onModalSuccess"
     data-ajax-failure="ShowErrorMessage"
     data-ajax-complete="onModalComplete">

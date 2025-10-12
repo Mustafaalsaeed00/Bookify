@@ -35,7 +35,7 @@ namespace Bookify.Web.Services
 			return (null, null);
 		}
 
-		public async Task DeleteAsync(string imageUrl, bool? imageThumbnail)
+		public Task DeleteAsync(string imageUrl, string? imageThumbnail)
 		{
 			var oldImagePath = $"{_webHostEnvironment.WebRootPath}{imageUrl}";
 			var oldThumbPath = $"{_webHostEnvironment.WebRootPath}{imageThumbnail}";
@@ -46,6 +46,8 @@ namespace Bookify.Web.Services
 
 			if (File.Exists(oldThumbPath))
 				File.Delete(oldThumbPath);
+
+			return Task.CompletedTask;
 		}
 
 	}

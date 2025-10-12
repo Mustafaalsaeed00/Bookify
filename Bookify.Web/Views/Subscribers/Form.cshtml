@@ -1,0 +1,177 @@
+﻿@model SubscriberFormViewModel
+@{
+	ViewData["Title"] = (Model.Id > 0 ? "Edit" : "Add") + " Subscriber";
+}
+
+<div class="card mt-5">
+	<div class="card-header">
+		<h3 class="mt-5">@(Model.Id > 0 ? "Edit Subscriber" : "Add Subscriber")</h3>
+	</div>
+	<div class="card-body">
+		<form id="subscribersForm" class="form" asp-controller="Subscribers" enctype="multipart/form-data" method="post">
+			@if (Model.Id > 0)
+			{
+				<input type="hidden" asp-for="Id" />
+			}
+
+			<!--begin::Input group-->
+			<div class="row mb-3 mb-6">
+				<!--begin::Label-->
+				<label class="col-lg-3 col-form-label fw-semibold fs-6" asp-for="Image">Avatar</label>
+				<!--end::Label-->
+				<!--begin::Col-->
+				<div class="col-lg-8 offset-column-1">
+					<!--begin::Image input-->
+					<div class="image-input image-input-outline" data-kt-image-input="true" style="background-image:  url('/assets/images/avatar-blank.svg')">
+						<!--begin::Preview existing avatar-->
+						<div class="image-input-wrapper w-125px h-125px" style="background-image: url('@(Model.Id > 0 ? $"{Model.ImageThumbnailUrl}" : "/assets/images/avatar-blank.svg")')"></div>
+						<!--end::Preview existing avatar-->
+						<!--begin::Label-->
+						<label class="btn btn-icon btn-circle btn-active-color-primary w-25px h-25px bg-body shadow" data-kt-image-input-action="change" data-bs-toggle="tooltip" aria-label="Change avatar" data-bs-original-title="Change avatar" data-kt-initialized="1">
+							<span class="svg-icon svg-icon-muted">
+								<svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+									<path opacity="0.3" d="M21.4 8.35303L19.241 10.511L13.485 4.755L15.643 2.59595C16.0248 2.21423 16.5426 1.99988 17.0825 1.99988C17.6224 1.99988 18.1402 2.21423 18.522 2.59595L21.4 5.474C21.7817 5.85581 21.9962 6.37355 21.9962 6.91345C21.9962 7.45335 21.7817 7.97122 21.4 8.35303ZM3.68699 21.932L9.88699 19.865L4.13099 14.109L2.06399 20.309C1.98815 20.5354 1.97703 20.7787 2.03189 21.0111C2.08674 21.2436 2.2054 21.4561 2.37449 21.6248C2.54359 21.7934 2.75641 21.9115 2.989 21.9658C3.22158 22.0201 3.4647 22.0084 3.69099 21.932H3.68699Z" fill="currentColor"></path>
+									<path d="M5.574 21.3L3.692 21.928C3.46591 22.0032 3.22334 22.0141 2.99144 21.9594C2.75954 21.9046 2.54744 21.7864 2.3789 21.6179C2.21036 21.4495 2.09202 21.2375 2.03711 21.0056C1.9822 20.7737 1.99289 20.5312 2.06799 20.3051L2.696 18.422L5.574 21.3ZM4.13499 14.105L9.891 19.861L19.245 10.507L13.489 4.75098L4.13499 14.105Z" fill="currentColor"></path>
+								</svg>
+							</span>
+							<!--begin::Inputs-->
+							<input type="file" asp-for="@Model.Image" accept=".png, .jpg, .jpeg">
+							<input type="hidden" name="avatar_remove">
+							<!--end::Inputs-->
+						</label>
+						<!--end::Label-->
+					</div>
+					<!--end::Image input-->
+					<!--begin::Hint-->
+					<div class="form-text">Allowed file types:  png, jpg, jpeg.</div>
+					<span class="text-danger" asp-validation-for="@Model.Image"></span>
+					<!--end::Hint-->
+				</div>
+				<!--end::Col-->
+			</div>
+			<!--end::Input group-->
+			<div class="row mb-3 mb-3">
+				<label class="col-lg-3 col-form-label required fw-semibold fs-6">Full Name</label>
+				<div class="col-lg-4 offset-column-1">
+					<div class="mb-5">
+						<div class="fv-row mb-3 mb-5">
+							<input class="form-control form-control-lg form-control-solid" asp-for="FirstName" placeholder="First Name">
+							<span asp-validation-for="FirstName" class="text-danger"></span>
+						</div>
+					</div>
+				</div>
+				<div class="col-lg-4 offset-column-1">
+					<div class="mb-5">
+						<div class="fv-row mb-3 mb-5">
+							<input class="form-control form-control-lg form-control-solid" asp-for="LastName" placeholder="Last Name">
+							<span asp-validation-for="LastName" class="text-danger"></span>
+						</div>
+					</div>
+				</div>
+			</div>
+			<div class="row mb-3">
+				<label class="col-lg-3 col-form-label required fw-semibold fs-6">Date of Birth</label>
+				<div class="col-lg-8 offset-column-1">
+					<div class="mb-5">
+						<div class="fv-row mb-3 mb-5">
+							<input type="text" class="form-control form-control-lg form-control-solid js-datepicker" asp-for="DateOfBirth">
+							<span asp-validation-for="DateOfBirth" class="text-danger"></span>
+						</div>
+					</div>
+				</div>
+			</div>
+			<div class="row mb-3">
+				<label class="col-lg-3 col-form-label required fw-semibold fs-6">National ID</label>
+				<div class="col-lg-8 offset-column-1">
+					<div class="mb-5">
+						<div class="fv-row mb-3 mb-5">
+							<input class="form-control form-control-lg form-control-solid" asp-for="NationalId" placeholder="National ID">
+							<span asp-validation-for="NationalId" class="text-danger"></span>
+						</div>
+					</div>
+				</div>
+			</div>
+			<div class="row mb-3">
+				<label class="col-lg-3 col-form-label required fw-semibold fs-6">Contacts</label>
+
+				<div class="col-lg-4 offset-column-1">
+					<div class="mb-5">
+						<div class="fv-row mb-3 mb-5">
+							<input class="form-control form-control-lg form-control-solid" asp-for="Email" placeholder="Email">
+							<span asp-validation-for="Email" class="text-danger"></span>
+						</div>
+					</div>
+				</div>
+				<div class="col-lg-4 offset-column-1">
+					<div class="mb-5">
+						<div class="fv-row mb-3 mb-5">
+							<input class="form-control form-control-lg form-control-solid" asp-for="MobileNumber" placeholder="Mobile Number">
+							<span asp-validation-for="MobileNumber" class="text-danger"></span>
+						</div>
+					</div>
+				</div>
+			</div>
+			<div class="row mb-3">
+				<label class="col-lg-3 col-form-label required fw-semibold fs-6">Governorate/Area</label>
+				<div class="col-lg-4 offset-column-1">
+					<div class="mb-5">
+						<div class="fv-row mb-3 mb-5">
+							<select id="Governorate" class="form-select form-select-solid js-select2" data-placeholder="Select Governorate" asp-for="GovernorateId" asp-items="Model.Governorates">
+								<option value="">Select Governorate</option>
+							</select>
+						</div>
+						<span asp-validation-for="GovernorateId" class="text-danger"></span>
+					</div>
+				</div>
+				<div class="col-lg-4 offset-column-1">
+					<div class="mb-5">
+						<div class="fv-row mb-3 mb-5">
+							<select id="Area" class="form-select form-select-solid js-select2" data-placeholder="Select Area" asp-for="AreaId" asp-items="Model.Areas">
+								<option value="">Select Area</option>
+							</select>
+						</div>
+						<span asp-validation-for="AreaId" class="text-danger"></span>
+					</div>
+				</div>
+			</div>
+			<div class="row mb-3">
+				<label class="col-lg-3 col-form-label required fw-semibold fs-6">Address</label>
+				<div class="col-lg-8 offset-column-1">
+					<div class="mb-5">
+						<div class="fv-row mb-3 mb-5">
+							<textarea class="form-control form-control-lg form-control-solid" asp-for="Address" placeholder="Address"></textarea>
+							<span asp-validation-for="Address" class="text-danger"></span>
+						</div>
+					</div>
+				</div>
+			</div>
+			<div class="row mb-3">
+				<label class="col-lg-3 col-form-label required fw-semibold fs-6">Has WhatsApp?</label>
+				<div class="col-lg-8 offset-column-1">
+					<div class="mb-5">
+						<div class="form-check form-check-solid form-check-custom mb-5">
+							<input class="form-check-input" type="checkbox" asp-for="HasWhatsApp">
+							<label class="form-check-label" asp-for="HasWhatsApp">Yes</label>
+						</div>
+					</div>
+				</div>
+			</div>
+		</form>
+	</div>
+	<div class="card-footer">
+		<button type="submit" class="btn btn-sm btn-primary" form="subscribersForm">
+			<span class="indicator-label">
+				Save
+			</span>
+			<span class="indicator-progress">
+				Please wait... <span class="spinner-border spinner-border-sm align-middle ms-2"></span>
+			</span>
+		</button>
+		<a class="btn btn-sm btn-light btn-text-primary ms-3" asp-action="Index">Cancel</a>
+	</div>
+</div>
+
+@section Scripts {
+	<partial name="_ValidationScriptsPartial"></partial>
+	<script src="~/js/subscribers.js" asp-append-version="true"></script>
+}

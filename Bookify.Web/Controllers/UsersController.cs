@@ -21,7 +21,6 @@ namespace Bookify.Web.Controllers
 		private readonly RoleManager<IdentityRole> _roleManager;
 		private readonly SignInManager<ApplicationUser> _signInManager;
 		private readonly IEmailSender _emailSender;
-		private readonly IWebHostEnvironment _webHostEnvironment;
 		private readonly IEmailBodyBuilder _emailBodyBuilder;
 		private readonly IMapper _mapper;
 
@@ -37,7 +36,6 @@ namespace Bookify.Web.Controllers
 			_roleManager = roleManager;
 			_signInManager = signInManager;
 			_emailSender = emailSender;
-			_webHostEnvironment = webHostEnvironment;
 			_mapper = mapper;
 			_emailBodyBuilder = emailBodyBuilder;
 		}
