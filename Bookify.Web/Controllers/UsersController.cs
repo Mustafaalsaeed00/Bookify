@@ -11,6 +11,7 @@ using System.Security.Claims;
 using System.Text;
 using System.Text.Encodings.Web;
 using System.Threading.Tasks;
+using static System.Net.WebRequestMethods;
 
 namespace Bookify.Web.Controllers
 {
@@ -93,12 +94,18 @@ namespace Bookify.Web.Controllers
 					protocol: Request.Scheme);
 
 
-				var body = _emailBodyBuilder.GetEmailBody(
-						  "https://res.cloudinary.com/mustafabookify/image/upload/v1759521934/icon-positive-vote-1_pnhmzm.png",
-						  $"Hey {user.FullName}, thanks for joining us!",
-						  "please confirm your email",
-						  $"{HtmlEncoder.Default.Encode(callbackUrl)}",
-						  "Active Account!");
+
+				var placeholders = new Dictionary<string, string>()
+				{
+					{"imageUrl","https://res.cloudinary.com/mustafabookify/image/upload/v1759521934/icon-positive-vote-1_pnhmzm.png"},
+					{ "header",$"Hey {user.FullName}, thanks for joining us!"},
+					{"body","please confirm your email"},
+					{"url",$"{HtmlEncoder.Default.Encode(callbackUrl)}"},
+					{"linkTitle","Active Account!"},
+				};
+
+				var body = _emailBodyBuilder.GetEmailBody(EmailTemplates.Email, placeholders);
+
 
 
 				await _emailSender.SendEmailAsync(user.Email, "Confirm your email" , body);
@@ -256,7 +263,8 @@ namespace Bookify.Web.Controllers
 			return Ok(user.LastUpdatedOn.ToString());
 		}
 		public async Task<IActionResult> AllowUserName(UserFormViewModel model)
-		{
+	{
+
 			var user = await _userManager.FindByNameAsync(model.UserName);
 
 			var isAllowed = user is null || user.Id.Equals(model.Id);
@@ -265,7 +273,8 @@ namespace Bookify.Web.Controllers
 		}
 		public async Task<IActionResult> AllowEmail(UserFormViewModel model)
 		{
-			var user = await _userManager.FindByNameAsync(model.Email);
+			var user = await _userManager.FindByEmailAsync(model.Email);
+
 			var isAllowed = user is null || user.Id.Equals(model.Id);
 
 			return Json(isAllowed);

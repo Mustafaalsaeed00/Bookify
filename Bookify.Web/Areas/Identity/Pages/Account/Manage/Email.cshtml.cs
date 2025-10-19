@@ -129,14 +129,16 @@ namespace Bookify.Web.Areas.Identity.Pages.Account.Manage
                     values: new { area = "Identity", userId = userId, email = Input.NewEmail, code = code },
                     protocol: Request.Scheme);
 
-				var body = _emailBodyBuilder.GetEmailBody(
-		                	"https://res.cloudinary.com/mustafabookify/image/upload/v1759521934/icon-positive-vote-1_pnhmzm.png",
-		                	$"Hey {user.FullName}, thanks for joining us!",
-		                	"please confirm your email",
-		                	$"{HtmlEncoder.Default.Encode(callbackUrl)}",
-		                	"Confirm Email");
+                var placeholders = new Dictionary<string, string>()
+                {
+                    {"imageUrl","https://res.cloudinary.com/mustafabookify/image/upload/v1759521934/icon-positive-vote-1_pnhmzm.png"},
+                    {"header",$"Hey {user.FullName}, thanks for joining us!"},
+                    {"body","please confirm your email"},
+                    {"url",$"{HtmlEncoder.Default.Encode(callbackUrl)}"},
+                    {"linkTitle","Confirm Email"},
+                };
 
-
+				var body = _emailBodyBuilder.GetEmailBody(EmailTemplates.Email , placeholders);
 
 				await _emailSender.SendEmailAsync(
                     Input.NewEmail,
@@ -173,7 +175,22 @@ namespace Bookify.Web.Areas.Identity.Pages.Account.Manage
                 pageHandler: null,
                 values: new { area = "Identity", userId = userId, code = code },
                 protocol: Request.Scheme);
-            await _emailSender.SendEmailAsync(
+
+
+			var placeholders = new Dictionary<string, string>()
+				{
+					{"imageUrl","https://res.cloudinary.com/mustafabookify/image/upload/v1759521934/icon-positive-vote-1_pnhmzm.png"},
+					{"header",$"Hey {user.FullName}, thanks for joining us!"},
+					{"body","please confirm your email"},
+					{"url",$"{HtmlEncoder.Default.Encode(callbackUrl)}"},
+					{"linkTitle","Confirm Email"},
+				};
+
+			var body = _emailBodyBuilder.GetEmailBody(EmailTemplates.Email, placeholders);
+
+
+
+			await _emailSender.SendEmailAsync(
                 email,
                 "Confirm your email",
                 $"Please confirm your account by <a href='{HtmlEncoder.Default.Encode(callbackUrl)}'>clicking here</a>.");

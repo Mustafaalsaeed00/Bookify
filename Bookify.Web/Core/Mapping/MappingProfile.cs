@@ -61,6 +61,10 @@ namespace Bookify.Web.Core.Mapping
 				.Map(dest => dest.Area, src => src.Area!.Name);
 
 
+			//Subscriptions
+			config.NewConfig<Subscription, SubscriptionViewModel>();
+
+
 		}
 	}
 }

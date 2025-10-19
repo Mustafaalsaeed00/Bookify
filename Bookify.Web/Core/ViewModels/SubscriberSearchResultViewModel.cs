@@ -2,7 +2,8 @@
 {
 	public class SubscriberSearchResultViewModel
 	{
-		public int Id { get; set; }
+		//public int Id { get; set; }
+		public string? Key { get; set; }
 		public string? FullName { get; set; }
 		public string? ImageUrl { get; set; }
 	}

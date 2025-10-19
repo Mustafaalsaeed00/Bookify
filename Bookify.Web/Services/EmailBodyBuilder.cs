@@ -12,10 +12,10 @@ namespace Bookify.Web.Services
 			_webHostEnvironment = webHostEnvironment;
 		}
 
-		public string GetEmailBody(string imageUrl, string header, string body, string url, string linkTitle)
+		public string GetEmailBody(string template, Dictionary<string, string> placeholders)
 		{
 
-			var filePath = $"{_webHostEnvironment.WebRootPath}/templates/email.html";
+			var filePath = $"{_webHostEnvironment.WebRootPath}/templates/{template}.html";
 
 			StreamReader str = new(filePath);
 
@@ -24,14 +24,11 @@ namespace Bookify.Web.Services
 
 			//var imageUrl = $"{Url.Action("Index", "Home", null, Request.Protocol)}";
 
-			return templateBody
-				.Replace("[imageUrl]", imageUrl)
-				.Replace("[header]", header)
-				.Replace("[body]", body)
-				.Replace("[url]", url)
-				.Replace("[linkTitle]", linkTitle);
+			foreach(var placeholder in placeholders)
+				templateBody = templateBody.Replace($"[{placeholder.Key}]", placeholder.Value);
 
 
+			return templateBody;
 		}
 	}
 }

@@ -257,7 +257,7 @@ $(document).ready(function () {
 		var row = btn.parents('tr');
 		row.removeClass('animate__animated animate__flash');
 		bootbox.confirm({
-			message: 'Are you sure!',
+			message: 'Are you sure that you need to toggle this item status?',
 			centerVertical: true,
 			buttons: {
 				confirm: {

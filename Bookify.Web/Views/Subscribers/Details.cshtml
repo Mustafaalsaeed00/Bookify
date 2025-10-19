@@ -2,244 +2,302 @@
 
 @{
 	ViewData["Title"] = "Details";
+
+	var lastSubscription = Model.Subscriptions.Last();
+
+	var subscriberStatus = Model.IsBlackListed ? SubscriberStatus.Banned : lastSubscription.EndDate < DateTime.Today ? SubscriberStatus.Inactive : SubscriberStatus.Active;
+	var statusClass = Model.IsBlackListed ? "danger" : lastSubscription.EndDate < DateTime.Today ? "warning" : "success";
 }
 
 <div class="alert bg-light-primary border border-primary border-3 border-dashed d-flex justify-content-between w-100 p-5 mb-10">
-    <div class="d-flex align-items-center">
-        <!--begin::Icon-->
-        <div class="symbol symbol-40px me-4">
-            <div class="symbol-label fs-2 fw-semibold text-success">
-                <!--begin::Svg Icon | path: icons/duotune/general/gen002.svg-->
-                <span class="svg-icon svg-icon-2 svg-icon-primary">
-                    <svg xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" version="1.1" id="Layer_1" x="0px" y="0px" viewBox="0 0 122.88 101.37" style="enable-background:new 0 0 122.88 101.37" xml:space="preserve"><g><path d="M12.64,77.27l0.31-54.92h-6.2v69.88c8.52-2.2,17.07-3.6,25.68-3.66c7.95-0.05,15.9,1.06,23.87,3.76 c-4.95-4.01-10.47-6.96-16.36-8.88c-7.42-2.42-15.44-3.22-23.66-2.52c-1.86,0.15-3.48-1.23-3.64-3.08 C12.62,77.65,12.62,77.46,12.64,77.27L12.64,77.27z M103.62,19.48c-0.02-0.16-0.04-0.33-0.04-0.51c0-0.17,0.01-0.34,0.04-0.51V7.34 c-7.8-0.74-15.84,0.12-22.86,2.78c-6.56,2.49-12.22,6.58-15.9,12.44V85.9c5.72-3.82,11.57-6.96,17.58-9.1 c6.85-2.44,13.89-3.6,21.18-3.02V19.48L103.62,19.48z M110.37,15.6h9.14c1.86,0,3.37,1.51,3.37,3.37v77.66 c0,1.86-1.51,3.37-3.37,3.37c-0.38,0-0.75-0.06-1.09-0.18c-9.4-2.69-18.74-4.48-27.99-4.54c-9.02-0.06-18.03,1.53-27.08,5.52 c-0.56,0.37-1.23,0.57-1.92,0.56c-0.68,0.01-1.35-0.19-1.92-0.56c-9.04-4-18.06-5.58-27.08-5.52c-9.25,0.06-18.58,1.85-27.99,4.54 c-0.34,0.12-0.71,0.18-1.09,0.18C1.51,100.01,0,98.5,0,96.64V18.97c0-1.86,1.51-3.37,3.37-3.37h9.61l0.06-11.26 c0.01-1.62,1.15-2.96,2.68-3.28l0,0c8.87-1.85,19.65-1.39,29.1,2.23c6.53,2.5,12.46,6.49,16.79,12.25 c4.37-5.37,10.21-9.23,16.78-11.72c8.98-3.41,19.34-4.23,29.09-2.8c1.68,0.24,2.88,1.69,2.88,3.33h0V15.6L110.37,15.6z M68.13,91.82c7.45-2.34,14.89-3.3,22.33-3.26c8.61,0.05,17.16,1.46,25.68,3.66V22.35h-5.77v55.22c0,1.86-1.51,3.37-3.37,3.37 c-0.27,0-0.53-0.03-0.78-0.09c-7.38-1.16-14.53-0.2-21.51,2.29C79.09,85.15,73.57,88.15,68.13,91.82L68.13,91.82z M58.12,85.25 V22.46c-3.53-6.23-9.24-10.4-15.69-12.87c-7.31-2.8-15.52-3.43-22.68-2.41l-0.38,66.81c7.81-0.28,15.45,0.71,22.64,3.06 C47.73,78.91,53.15,81.64,58.12,85.25L58.12,85.25z" fill="currentColor"></path></g></svg>
+	<div class="d-flex align-items-center">
+		<!--begin::Icon-->
+		<div class="symbol symbol-40px me-4">
+			<div class="symbol-label fs-2 fw-semibold text-success">
+				<!--begin::Svg Icon | path: icons/duotune/general/gen002.svg-->
+				<span class="svg-icon svg-icon-2 svg-icon-primary">
+					<svg xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" version="1.1" id="Layer_1" x="0px" y="0px" viewBox="0 0 122.88 101.37" style="enable-background:new 0 0 122.88 101.37" xml:space="preserve"><g><path d="M12.64,77.27l0.31-54.92h-6.2v69.88c8.52-2.2,17.07-3.6,25.68-3.66c7.95-0.05,15.9,1.06,23.87,3.76 c-4.95-4.01-10.47-6.96-16.36-8.88c-7.42-2.42-15.44-3.22-23.66-2.52c-1.86,0.15-3.48-1.23-3.64-3.08 C12.62,77.65,12.62,77.46,12.64,77.27L12.64,77.27z M103.62,19.48c-0.02-0.16-0.04-0.33-0.04-0.51c0-0.17,0.01-0.34,0.04-0.51V7.34 c-7.8-0.74-15.84,0.12-22.86,2.78c-6.56,2.49-12.22,6.58-15.9,12.44V85.9c5.72-3.82,11.57-6.96,17.58-9.1 c6.85-2.44,13.89-3.6,21.18-3.02V19.48L103.62,19.48z M110.37,15.6h9.14c1.86,0,3.37,1.51,3.37,3.37v77.66 c0,1.86-1.51,3.37-3.37,3.37c-0.38,0-0.75-0.06-1.09-0.18c-9.4-2.69-18.74-4.48-27.99-4.54c-9.02-0.06-18.03,1.53-27.08,5.52 c-0.56,0.37-1.23,0.57-1.92,0.56c-0.68,0.01-1.35-0.19-1.92-0.56c-9.04-4-18.06-5.58-27.08-5.52c-9.25,0.06-18.58,1.85-27.99,4.54 c-0.34,0.12-0.71,0.18-1.09,0.18C1.51,100.01,0,98.5,0,96.64V18.97c0-1.86,1.51-3.37,3.37-3.37h9.61l0.06-11.26 c0.01-1.62,1.15-2.96,2.68-3.28l0,0c8.87-1.85,19.65-1.39,29.1,2.23c6.53,2.5,12.46,6.49,16.79,12.25 c4.37-5.37,10.21-9.23,16.78-11.72c8.98-3.41,19.34-4.23,29.09-2.8c1.68,0.24,2.88,1.69,2.88,3.33h0V15.6L110.37,15.6z M68.13,91.82c7.45-2.34,14.89-3.3,22.33-3.26c8.61,0.05,17.16,1.46,25.68,3.66V22.35h-5.77v55.22c0,1.86-1.51,3.37-3.37,3.37 c-0.27,0-0.53-0.03-0.78-0.09c-7.38-1.16-14.53-0.2-21.51,2.29C79.09,85.15,73.57,88.15,68.13,91.82L68.13,91.82z M58.12,85.25 V22.46c-3.53-6.23-9.24-10.4-15.69-12.87c-7.31-2.8-15.52-3.43-22.68-2.41l-0.38,66.81c7.81-0.28,15.45,0.71,22.64,3.06 C47.73,78.91,53.15,81.64,58.12,85.25L58.12,85.25z" fill="currentColor"></path></g></svg>
 
-                </span>
-                <!--end::Svg Icon-->
-            </div>
-        </div>
-        <!--end::Icon-->
-        <!--begin::Content-->
-        <div class="d-flex flex-column pe-0 pe-sm-10">
-            <h5 class="mb-1">Subscriber Details</h5>
-        </div>
-        <!--end::Content-->
-    </div>
-    <div>
-        <a class="btn btn-sm btn-primary" asp-action="Edit" asp-route-id="@Model.Id">
-            <i class="bi bi-plus-square-dotted"></i>
-            Edit
-        </a>
-    </div>
+				</span>
+				<!--end::Svg Icon-->
+			</div>
+		</div>
+		<!--end::Icon-->
+		<!--begin::Content-->
+		<div class="d-flex flex-column pe-0 pe-sm-10">
+			<h5 class="mb-1">Subscriber Details</h5>
+		</div>
+		<!--end::Content-->
+	</div>
+	<div>
+		<a class="btn btn-sm btn-primary" asp-action="Edit" asp-route-id="@Model.Key">
+			<i class="bi bi-plus-square-dotted"></i>
+			Edit
+		</a>
+	</div>
 
 </div>
 
 <div class="d-flex flex-column flex-column-fluid  container-fluid ">
-    <!--begin::Post-->
-    <div class="content flex-column-fluid" id="kt_content">
-        <!--begin::Layout-->
-        <div class="d-flex flex-column flex-xl-row">
-            <!--begin::Sidebar-->
-            <div class="flex-column flex-lg-row-auto w-100 w-xl-350px mb-10">
+	<!--begin::Post-->
+	<div class="content flex-column-fluid" id="kt_content">
+		<!--begin::Layout-->
+		<div class="d-flex flex-column flex-xl-row">
+			<!--begin::Sidebar-->
+			<div class="flex-column flex-lg-row-auto w-100 w-xl-350px mb-10">
 
-                <!--begin::Card-->
-                <div class="card mb-5 mb-xl-8">
-                    <!--begin::Card body-->
-                    <div class="card-body pt-15">
-                        <!--begin::Summary-->
-                        <div class="d-flex flex-center flex-column mb-5">
-                            <!--begin::Avatar-->
-                            <a data-fslightbox href="@Model.ImageUrl">
-                                <div class="symbol symbol-150px symbol-circle mb-7">
-                                    <img src="@Model.ImageThumbnailUrl" alt="image">
-                                </div>
-                            </a>
-                           
-                            <!--end::Avatar-->
-                            <!--begin::Name-->
-                            <a href="#" class="fs-3 text-gray-800 text-hover-primary fw-bold mb-1">
-                                @Model.FullName
-                            </a>
-                            <!--end::Name-->
-                            <!--begin::Email-->
-                            <a href="#" class="fs-5 fw-semibold text-muted text-hover-primary mb-6">
-                                @Model.Email
-                            </a>
-                            <!--end::Email-->
-                        </div>
-                        <!--end::Summary-->
-                        <!--begin::Details toggle-->
-                        <div class="d-flex flex-stack fs-4 py-3">
-                            <div class="fw-bold">
-                                Details
-                            </div>
+				<!--begin::Card-->
+				<div class="card mb-5 mb-xl-8">
+					<!--begin::Card body-->
+					<div class="card-body pt-15">
+						<!--begin::Summary-->
+						<div class="d-flex flex-center flex-column mb-5">
+							<!--begin::Avatar-->
+							<a data-fslightbox href="@Model.ImageUrl">
+								<div class="symbol symbol-150px symbol-circle mb-7">
+									<img src="@Model.ImageThumbnailUrl" alt="image">
+								</div>
+							</a>
 
-                            <!--begin::Badge-->
-                            <div class="badge badge-light-@(Model.IsBlackListed ? "danger" : "success") d-inline">@(Model.IsBlackListed ? "Blocked" : "Active") Subscriber</div>
-                            <!--begin::Badge-->
-                        </div>
-                        <!--end::Details toggle-->
+							<!--end::Avatar-->
+							<!--begin::Name-->
+							<a href="#" class="fs-3 text-gray-800 text-hover-primary fw-bold mb-1">
+								@Model.FullName
+							</a>
+							<!--end::Name-->
+							<!--begin::Email-->
+							<a href="#" class="fs-5 fw-semibold text-muted text-hover-primary mb-6">
+								@Model.Email
+							</a>
+							<!--end::Email-->
+						</div>
+						<!--end::Summary-->
+						<!--begin::Details toggle-->
+						<div class="d-flex flex-stack fs-4 py-3">
+							<div class="fw-bold">
+								Details
+							</div>
 
-                        <div class="separator separator-dashed my-3"></div>
+							<!--begin::Badge-->
+							<div class="badge badge-light-@statusClass d-inline" id="StatusBadge">@subscriberStatus Subscriber</div>
+							<!--begin::Badge-->
+						</div>
+						<!--end::Details toggle-->
 
-                        <!--begin::Details content-->
-                        <div class="pb-5 fs-6">
-                            <!--begin::Details item-->
-                            <div class="fw-bold mt-5">Account ID</div>
-                            <div class="text-gray-600">ID-@Model.Id</div>
-                            <!--End::Details item-->
-                            <!--begin::Details item-->
-                            <div class="fw-bold mt-5">Mobile Number</div>
-                            <div class="text-gray-600">@Model.MobileNumber</div>
-                            <!--End::Details item-->
-                            <!--begin::Details item-->
-                            <div class="fw-bold mt-5">National ID</div>
-                            <div class="text-gray-600">@Model.NationalId</div>
-                            <!--End::Details item-->
-                            <!--begin::Details item-->
-                            <div class="fw-bold mt-5">Date Of Birth</div>
-                            <div class="text-gray-600">@Model.DateOfBirth.ToString("dd-MM-yyyy")</div>
-                            <!--End::Details item-->
-                            <!--begin::Details item-->
-                            <div class="fw-bold mt-5">Address</div>
-                            <div class="text-gray-600">@Model.Address, @Model.Area, @Model.Governorate</div>
-                            <!--End::Details item-->
-                        </div>
-                        <!--end::Details content-->
-                    </div>
-                    <!--end::Card body-->
-                </div>
-                <!--end::Card-->
-            </div>
-            <!--end::Sidebar-->
-            <!--begin::Content-->
-            <div class="flex-lg-row-fluid ms-lg-15">
-                <!--begin:::Tabs-->
-                <ul class="nav nav-custom nav-tabs nav-line-tabs nav-line-tabs-2x border-0 fs-4 fw-semibold mb-8" role="tablist">
-                    <!--begin:::Tab item-->
-                    <li class="nav-item" role="presentation">
-                        <a class="nav-link text-active-primary pb-4 active" data-bs-toggle="tab" href="#kt_ecommerce_customer_overview" aria-selected="true" role="tab">Overview</a>
-                    </li>
-                    <!--end:::Tab item-->
-                    <!--begin:::Tab item-->
-                    <li class="nav-item" role="presentation">
-                        <a class="nav-link text-active-primary pb-4" data-bs-toggle="tab" href="#kt_ecommerce_customer_general" aria-selected="false" tabindex="-1" role="tab">Rentals</a>
-                    </li>
-                    <!--end:::Tab item-->
-                </ul>
-                <!--end:::Tabs-->
-                <!--begin:::Tab content-->
-                <div class="tab-content" id="myTabContent">
-                    <!--begin:::Tab pane-->
-                    <div class="tab-pane fade show active" id="kt_ecommerce_customer_overview" role="tabpanel">
-                        <div class="row row-cols-1 row-cols-md-2 mb-6 mb-xl-9">
-                            <div class="col">
-                                <!--begin::Card-->
-                                <div class="card pt-4 h-md-100 mb-6 mb-md-0">
-                                    <!--begin::Card header-->
-                                    <div class="card-header border-0">
-                                        <!--begin::Card title-->
-                                        <div class="card-title">
-                                            <h2 class="fw-bold">Reward Points</h2>
-                                        </div>
-                                        <!--end::Card title-->
-                                    </div>
-                                    <!--end::Card header-->
-                                    <!--begin::Card body-->
-                                    <div class="card-body pt-0">
-                                        <div class="fw-bold fs-2">
-                                            <div class="d-flex">
-                                                <i class="ki-duotone ki-heart text-info fs-2x"><span class="path1"></span><span class="path2"></span></i>                <div class="ms-2">
-                                                    4,571 <span class="text-muted fs-4 fw-semibold">Points earned</span>
-                                                </div>
-                                            </div>
-                                            <div class="fs-7 fw-normal text-muted">Earn reward points with every purchase.</div>
-                                        </div>
-                                    </div>
-                                    <!--end::Card body-->
-                                </div>
-                                <!--end::Card-->
-                            </div>
+						<div class="separator separator-dashed my-3"></div>
 
-                            <div class="col">
-                                <!--begin::Reward Tier-->
-                                <a href="#" class="card bg-@(Model.IsBlackListed ? "danger" : "success") hoverable h-md-100">
-                                    <!--begin::Body-->
-                                    <div class="card-body">
-                                        <!--begin::Svg Icon | path: icons/duotune/general/gen020.svg-->
-                                        <span class="svg-icon svg-icon-white svg-icon-3x ms-n1">
-                                            <svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-                                                <path opacity="0.3" d="M7.16973 20.95C6.26973 21.55 5.16972 20.75 5.46972 19.75L7.36973 14.05L2.46972 10.55C1.56972 9.95005 2.06973 8.55005 3.06973 8.55005H20.8697C21.9697 8.55005 22.3697 9.95005 21.4697 10.55L7.16973 20.95Z" fill="currentColor" />
-                                                <path d="M11.0697 2.75L7.46973 13.95L16.9697 20.85C17.8697 21.45 18.9697 20.65 18.6697 19.65L13.1697 2.75C12.7697 1.75 11.3697 1.75 11.0697 2.75Z" fill="currentColor" />
-                                            </svg>
-                                        </span>
-                                        <!--end::Svg Icon-->
-                                        <div class="text-white fw-bold fs-2 mt-5">@(Model.IsBlackListed ? "Blocked" : "Active") Subscriber</div>
+						<!--begin::Details content-->
+						<div class="pb-5 fs-6">
+							<!--begin::Details item-->
+							<div class="fw-bold mt-5">Account ID</div>
+							<div class="text-gray-600">ID-@Model.Id</div>
+							<!--End::Details item-->
+							<!--begin::Details item-->
+							<div class="fw-bold mt-5">Mobile Number</div>
+							<div class="text-gray-600">@Model.MobileNumber</div>
+							<!--End::Details item-->
+							<!--begin::Details item-->
+							<div class="fw-bold mt-5">National ID</div>
+							<div class="text-gray-600">@Model.NationalId</div>
+							<!--End::Details item-->
+							<!--begin::Details item-->
+							<div class="fw-bold mt-5">Date Of Birth</div>
+							<div class="text-gray-600">@Model.DateOfBirth.ToString("dd-MM-yyyy")</div>
+							<!--End::Details item-->
+							<!--begin::Details item-->
+							<div class="fw-bold mt-5">Address</div>
+							<div class="text-gray-600">@Model.Address, @Model.Area, @Model.Governorate</div>
+							<!--End::Details item-->
+						</div>
+						<!--end::Details content-->
+					</div>
+					<!--end::Card body-->
+				</div>
+				<!--end::Card-->
+			</div>
+			<!--end::Sidebar-->
+			<!--begin::Content-->
+			<div class="flex-lg-row-fluid ms-lg-15">
+				<!--begin:::Tabs-->
+				<ul class="nav nav-custom nav-tabs nav-line-tabs nav-line-tabs-2x border-0 fs-4 fw-semibold mb-8" role="tablist">
+					<!--begin:::Tab item-->
+					<li class="nav-item" role="presentation">
+						<a class="nav-link text-active-primary pb-4 active" data-bs-toggle="tab" href="#kt_ecommerce_customer_overview" aria-selected="true" role="tab">Overview</a>
+					</li>
+					<!--end:::Tab item-->
+					<!--begin:::Tab item-->
+					<li class="nav-item" role="presentation">
+						<a class="nav-link text-active-primary pb-4" data-bs-toggle="tab" href="#kt_ecommerce_customer_general" aria-selected="false" tabindex="-1" role="tab">Rentals</a>
+					</li>
+					<!--end:::Tab item-->
+				</ul>
+				<!--end:::Tabs-->
+				<!--begin:::Tab content-->
+				<div class="tab-content" id="myTabContent">
+					<!--begin:::Tab pane-->
+					<div class="tab-pane fade show active" id="kt_ecommerce_customer_overview" role="tabpanel">
+						<div class="row row-cols-1 row-cols-md-2 mb-6 mb-xl-9">
+							<div class="col">
+								<!--begin::Card-->
+								<div class="card pt-4 h-md-100 mb-6 mb-md-0">
+									<!--begin::Card header-->
+									<div class="card-header border-0">
+										<!--begin::Card title-->
+										<div class="card-title">
+											<h2 class="fw-bold">Reward Points</h2>
+										</div>
+										<!--end::Card title-->
+									</div>
+									<!--end::Card header-->
+									<!--begin::Card body-->
+									<div class="card-body pt-0">
+										<div class="fw-bold fs-2">
+											<div class="d-flex">
+												<i class="ki-duotone ki-heart text-info fs-2x"><span class="path1"></span><span class="path2"></span></i>                <div class="ms-2">
+													4,571 <span class="text-muted fs-4 fw-semibold">Points earned</span>
+												</div>
+											</div>
+											<div class="fs-7 fw-normal text-muted">Earn reward points with every purchase.</div>
+										</div>
+									</div>
+									<!--end::Card body-->
+								</div>
+								<!--end::Card-->
+							</div>
 
-                                        <div class="fw-semibold text-white">
-                                            Subscirber Since: @Model.CreatedOn.ToString("dd MMM, yyyy")
-                                        </div>
-                                    </div>
-                                    <!--end::Body-->
-                                </a>
-                                <!--end::Reward Tier-->
-                            </div>
-                        </div>
+							<div class="col">
+								<!--begin::Reward Tier-->
+								<a href="#" class="card bg-@statusClass hoverable h-md-100">
+									<!--begin::Body-->
+									<div class="card-body">
+										<!--begin::Svg Icon | path: icons/duotune/general/gen020.svg-->
+										<span class="svg-icon svg-icon-white svg-icon-3x ms-n1 @(subscriberStatus == SubscriberStatus.Active ? string.Empty : "d-none")" id="ActiveStatusIcon">
+											<svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+												<path opacity="0.3" d="M7.16973 20.95C6.26973 21.55 5.16972 20.75 5.46972 19.75L7.36973 14.05L2.46972 10.55C1.56972 9.95005 2.06973 8.55005 3.06973 8.55005H20.8697C21.9697 8.55005 22.3697 9.95005 21.4697 10.55L7.16973 20.95Z" fill="currentColor" />
+												<path d="M11.0697 2.75L7.46973 13.95L16.9697 20.85C17.8697 21.45 18.9697 20.65 18.6697 19.65L13.1697 2.75C12.7697 1.75 11.3697 1.75 11.0697 2.75Z" fill="currentColor" />
+											</svg>
+										</span>
+										@if(subscriberStatus == SubscriberStatus.Inactive)
+										{
+											<span class="svg-icon svg-icon-white svg-icon-3x ms-n1">
+												<svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+													<path d="M22 12C22 17.5 17.5 22 12 22C6.5 22 2 17.5 2 12C2 6.5 6.5 2 12 2C17.5 2 22 6.5 22 12ZM18 12C18 11.4 17.6 11 17 11H7C6.4 11 6 11.4 6 12C6 12.6 6.4 13 7 13H17C17.6 13 18 12.6 18 12Z" fill="currentColor" />
+												</svg>
+											</span>
+										}
+										else if(subscriberStatus == SubscriberStatus.Banned)
+										{
+											<span class="svg-icon svg-icon-white svg-icon-3x ms-n1">
+												<svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+													<path opacity="0.3" d="M12 10.6L14.8 7.8C15.2 7.4 15.8 7.4 16.2 7.8C16.6 8.2 16.6 8.80002 16.2 9.20002L13.4 12L12 10.6ZM10.6 12L7.8 14.8C7.4 15.2 7.4 15.8 7.8 16.2C8 16.4 8.3 16.5 8.5 16.5C8.7 16.5 8.99999 16.4 9.19999 16.2L12 13.4L10.6 12Z" fill="currentColor" />
+													<path d="M22 12C22 17.5 17.5 22 12 22C6.5 22 2 17.5 2 12C2 6.5 6.5 2 12 2C17.5 2 22 6.5 22 12ZM13.4 12L16.2 9.20001C16.6 8.80001 16.6 8.19999 16.2 7.79999C15.8 7.39999 15.2 7.39999 14.8 7.79999L12 10.6L9.2 7.79999C8.8 7.39999 8.2 7.39999 7.8 7.79999C7.4 8.19999 7.4 8.80001 7.8 9.20001L10.6 12L7.8 14.8C7.4 15.2 7.4 15.8 7.8 16.2C8 16.4 8.3 16.5 8.5 16.5C8.7 16.5 9 16.4 9.2 16.2L12 13.4L14.8 16.2C15 16.4 15.3 16.5 15.5 16.5C15.7 16.5 16 16.4 16.2 16.2C16.6 15.8 16.6 15.2 16.2 14.8L13.4 12Z" fill="currentColor" />
+												</svg>
+											</span>
+										}
+										<!--end::Svg Icon-->
+										<div class="text-white fw-bold fs-2 mt-5" id="CardStatus">@subscriberStatus Subscriber</div>
+										<div class="fw-semibold text-white">Subscirber Since: @Model.CreatedOn.ToString("dd MMM, yyyy")</div>
+									</div>
+									<!--end::Body-->
+								</a>
+								<!--end::Reward Tier-->
+							</div>
+						</div>
 
 
-                        <!--begin::Card-->
-                        <div class="card pt-4 mb-6 mb-xl-9">
-                            <!--begin::Card header-->
-                            <div class="card-header border-0">
-                                <!--begin::Card title-->
-                                <div class="card-title">
-                                    <h2>Renewal History</h2>
-                                </div>
-                                <!--end::Card title-->
-                            </div>
-                            <!--end::Card header-->
-                            <!--begin::Card body-->
-                            <div class="card-body pt-0 pb-5">
-                                <p>Renewal History will be shown here</p>
-                            </div>
-                            <!--end::Card body-->
-                        </div>
-                        <!--end::Card-->
-                    </div>
-                    <!--end:::Tab pane-->
-                    <!--begin:::Tab pane-->
-                    <div class="tab-pane fade" id="kt_ecommerce_customer_general" role="tabpanel">
-                        <!--begin::Card-->
-                        <div class="card pt-4 mb-6 mb-xl-9">
-                            <!--begin::Card header-->
-                            <div class="card-header border-0">
-                                <!--begin::Card title-->
-                                <div class="card-title">
-                                    <h2>Rentals</h2>
-                                </div>
-                                <!--end::Card title-->
-                            </div>
-                            <!--end::Card header-->
-                            <!--begin::Card body-->
-                            <div class="card-body pt-0 pb-5">
-                                <p>Rentals will be shown here</p>
-                            </div>
-                            <!--end::Card body-->
-                        </div>
-                        <!--end::Card-->
-                    </div>
-                    <!--end:::Tab pane-->
-                </div>
-                <!--end:::Tab content-->
-            </div>
-            <!--end::Content-->
-        </div>
-        <!--end::Layout--> 
-    </div>
-    <!--end::Post-->
+						<!--begin::Card-->
+						<div class="card pt-4 mb-6 mb-xl-9">
+							<!--begin::Card header-->
+							<div class="card-header border-0 pt-5">
+								<h3 class="card-title align-items-start flex-column">
+									<span class="card-label fw-bold fs-3 mb-1">Renewal History</span>
+								</h3>
+								@if (!Model.IsBlackListed)
+								{
+									<div class="card-toolbar">
+										<a href="javascript:;" class="btn btn-sm btn-light-primary js-renew" data-key="@Model.Key">
+											<svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+												<path d="M14.5 20.7259C14.6 21.2259 14.2 21.826 13.7 21.926C13.2 22.026 12.6 22.0259 12.1 22.0259C9.5 22.0259 6.9 21.0259 5 19.1259C1.4 15.5259 1.09998 9.72592 4.29998 5.82592L5.70001 7.22595C3.30001 10.3259 3.59999 14.8259 6.39999 17.7259C8.19999 19.5259 10.8 20.426 13.4 19.926C13.9 19.826 14.4 20.2259 14.5 20.7259ZM18.4 16.8259L19.8 18.2259C22.9 14.3259 22.7 8.52593 19 4.92593C16.7 2.62593 13.5 1.62594 10.3 2.12594C9.79998 2.22594 9.4 2.72595 9.5 3.22595C9.6 3.72595 10.1 4.12594 10.6 4.02594C13.1 3.62594 15.7 4.42595 17.6 6.22595C20.5 9.22595 20.7 13.7259 18.4 16.8259Z" fill="currentColor" />
+												<path opacity="0.3" d="M2 3.62592H7C7.6 3.62592 8 4.02592 8 4.62592V9.62589L2 3.62592ZM16 14.4259V19.4259C16 20.0259 16.4 20.4259 17 20.4259H22L16 14.4259Z" fill="currentColor" />
+											</svg>
+											Renew
+										</a>
+									</div>
+								}
+							</div>
+							<!--end::Card header-->
+							<!--begin::Card body-->
+							<div class="card-body py-3">
+								<div class="table-responsive">
+									<!--begin::Table-->
+									<table class="table align-middle gs-0 gy-4" id="SubscriptionsTable" > 
+										<!--begin::Table head-->
+										<thead>
+											<tr class="fw-bold text-muted bg-light">
+												<th class="ps-4 min-w-125px rounded-start">Start Date</th>
+												<th class="min-w-125px">End Date</th>
+												<th class="min-w-125px">Status</th>
+												<th class="min-w-200px text-end rounded-end pe-4">Add On</th>
+											</tr>
+										</thead>
+										<!--end::Table head-->
+										<!--begin::Table body-->
+										<tbody>
+											@foreach (var subscription in Model.Subscriptions)
+											{
+												<partial name="_SubscriptionRow" model="@subscription"/>
+											}
+										</tbody>
+										<!--end::Table body-->
+									</table>
+									<!--end::Table-->
+								</div>
+							</div>
+						</div>
+
+						<!--end::Card body-->
+					</div>
+					<!--end::Card-->
+				</div>
+				<!--end:::Tab pane-->
+				<!--begin:::Tab pane-->
+				<div class="tab-pane fade" id="kt_ecommerce_customer_general" role="tabpanel">
+					<!--begin::Card-->
+					<div class="card pt-4 mb-6 mb-xl-9">
+						<!--begin::Card header-->
+						<div class="card-header border-0">
+							<!--begin::Card title-->
+							<div class="card-title">
+								<h2>Rentals</h2>
+							</div>
+							<!--end::Card title-->
+						</div>
+						<!--end::Card header-->
+						<!--begin::Card body-->
+						<div class="card-body pt-0 pb-5">
+							<p>Rentals will be shown here</p>
+						</div>
+						<!--end::Card body-->
+					</div>
+					<!--end::Card-->
+				</div>
+				<!--end:::Tab pane-->
+			</div>
+			<!--end:::Tab content-->
+		</div>
+		<!--end::Content-->
+	</div>
+	<!--end::Layout-->
 </div>
+<!--end::Post-->
+</div>
+
+@section Scripts{
+	<script src="~/js/renew.js" asp-append-version="true"></script>
+}
 
 @section Plugins
 {
-    <script src="~/assets/plugins/fslightbox/fslightbox.bundle.js"></script>
+	<script src="~/assets/plugins/fslightbox/fslightbox.bundle.js"></script>
 
 }

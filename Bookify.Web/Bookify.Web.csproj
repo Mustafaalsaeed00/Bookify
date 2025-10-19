@@ -8,6 +8,10 @@
   </PropertyGroup>
 
   <ItemGroup>
+    <Content Remove="wwwroot\templates\notification.html" />
+  </ItemGroup>
+
+  <ItemGroup>
     <PackageReference Include="CloudinaryDotNet" Version="1.27.7" />
     <PackageReference Include="Mapster" Version="7.4.0" />
     <PackageReference Include="Mapster.DependencyInjection" Version="1.0.1" />
@@ -21,6 +25,7 @@
     <PackageReference Include="SixLabors.ImageSharp.Web" Version="3.2.0" />
     <PackageReference Include="System.Linq.Dynamic.Core" Version="1.6.7" />
     <PackageReference Include="UoN.ExpressiveAnnotations.NetCore" Version="1.0.0" />
+    <PackageReference Include="WhatsAppCloudApi" Version="1.0.0" />
   </ItemGroup>
 
   <ItemGroup>
@@ -30,6 +35,7 @@
   </ItemGroup>
 
   <ItemGroup>
+    <None Include="wwwroot\templates\notification.html" />
     <None Include="wwwroot\templates\email.html" />
   </ItemGroup>
 
