@@ -88,6 +88,20 @@ namespace Bookify.Web.Controllers
 			return PartialView("_BookCopyRow", viewModel);
 		}
 
+		public IActionResult RentalHistory(int id)
+		{
+			var copyHistory = _context.RentalCopies
+				.Include(c => c.Rental)
+				.ThenInclude(r => r!.Subscriber)
+				.Where(c => c.BookCopyId == id)
+				.OrderByDescending(c => c.ReturnDate)
+				.ToList();
+
+			
+			var viewModel = _mapper.Map<IEnumerable<CopyRentalHistoryViewModel>>(copyHistory);
+
+			return View(viewModel);
+		}
 
 		[HttpPost]
 		[ValidateAntiForgeryToken]

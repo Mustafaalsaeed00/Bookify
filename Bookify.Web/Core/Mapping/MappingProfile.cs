@@ -31,7 +31,10 @@ namespace Bookify.Web.Core.Mapping
 
 			//BookCopies
 			config.NewConfig<BookCopy, BookCopyViewModel>()
-				.Map(dest => dest.BookTitle, src => src.Book!.Title);
+				.Map(dest => dest.BookTitle, src => src.Book!.Title)
+				.Map(dest => dest.BookId, src => src.Book!.Id)
+				.Map(dest => dest.ImageThumbnailUrl, src => src.Book!.ImageThumbnailUrl)
+				.Map(dest => dest.ImageUrl, src => src.Book!.ImageUrl);
 			config.NewConfig<BookCopyFormViewModel, BookCopy>();
 
 			//Users
@@ -55,7 +58,7 @@ namespace Bookify.Web.Core.Mapping
 			config.NewConfig<Subscriber, SubscriberFormViewModel>();
 			config.NewConfig<Subscriber, SubscriberSearchResultViewModel>()
 				.Map(dest => dest.FullName, src => $"{src.FirstName} {src.LastName}");
-			config.NewConfig<Subscriber, SubscriberDetailsViewModel>()
+			config.NewConfig<Subscriber, SubscriberViewModel>()
 				.Map(dest => dest.FullName, src => $"{src.FirstName} {src.LastName}")
 				.Map(dest => dest.Governorate, src => src.Governorate!.Name)
 				.Map(dest => dest.Area, src => src.Area!.Name);
@@ -63,6 +66,13 @@ namespace Bookify.Web.Core.Mapping
 
 			//Subscriptions
 			config.NewConfig<Subscription, SubscriptionViewModel>();
+
+			//Rentals
+			config.NewConfig<Rental, RentalViewModel>();
+			config.NewConfig<RentalCopy, RentalCopyViewModel>();
+			config.NewConfig<RentalCopy, CopyRentalHistoryViewModel>()
+			.Map(dest => dest.SubscriberName, src => $"{src.Rental!.Subscriber!.FirstName} {src.Rental.Subscriber.LastName}" )
+			.Map(dest => dest.SubscriberMobile, src => src.Rental!.Subscriber!.MobileNumber);
 
 
 		}

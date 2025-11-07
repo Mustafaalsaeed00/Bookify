@@ -1,6 +1,7 @@
 ﻿
 using Bookify.Web.Core.Models;
 using Bookify.Web.Services;
+using Hangfire;
 using Microsoft.AspNetCore.DataProtection;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.Identity.UI.Services;
@@ -119,9 +120,10 @@ namespace Bookify.Web.Controllers
 			var body = _emailBodyBuilder.GetEmailBody(EmailTemplates.Notification, placeholders);
 
 
-			await _emailSender.SendEmailAsync(
+			BackgroundJob.Enqueue(() => _emailSender.SendEmailAsync(
 				subscriber.Email,
-				"welcome to Bookify", body);
+				"welcome to Bookify", body));
+
 
 			//Send welcome message using whatsApp
 
@@ -144,7 +146,7 @@ namespace Bookify.Web.Controllers
 
 				var mobileNumber = _webHostEnvironment.IsDevelopment() ? "966501642434" : subscriber.MobileNumber;
 
-				await _whatsAppClient.SendMessage(mobileNumber, WhatsAppLanguageCode.English_US, WhatsAppTemplates.WelcomeMessage, components);
+				BackgroundJob.Enqueue(() => _whatsAppClient.SendMessage(mobileNumber, WhatsAppLanguageCode.English_US, WhatsAppTemplates.NewSubscriberNotice, components));
 			}
 
 			string subscriberId = _dataProtector.Protect(subscriber.Id.ToString());
@@ -223,12 +225,14 @@ namespace Bookify.Web.Controllers
 				.Include(s => s.Governorate)
 				.Include(s => s.Area)
 				.Include(s => s.Subscriptions)
+				.Include(s => s.Rentals)
+				.ThenInclude(r => r.RentalCopies)
 				.SingleOrDefault(s=> s.Id == subscriberId);
 
 			if (subscriber is null)
 				return NotFound();
 
-			var viewModel = _mapper.Map<SubscriberDetailsViewModel>(subscriber);
+			var viewModel = _mapper.Map<SubscriberViewModel>(subscriber);
 			viewModel.Key = id;
 
 			return View(viewModel);
@@ -236,7 +240,7 @@ namespace Bookify.Web.Controllers
 
 		[HttpPost]
 		[ValidateAntiForgeryToken]
-		public async Task<IActionResult> RenewSubscription(string sKey)
+		public IActionResult RenewSubscription(string sKey)
 		{
 			var subscriberId = int.Parse(_dataProtector.Unprotect(sKey));
 
@@ -268,16 +272,15 @@ namespace Bookify.Web.Controllers
 				{
 					{"imageUrl","https://res.cloudinary.com/mustafabookify/image/upload/v1759580827/icon-positive-vote-2_jccgi4.png"},
 					{"header",$"Hello {subscriber.FirstName},"},
-					{"body",$"your subscription has been renewed through {newSubscription.EndDate.ToString("dd MMM, yyyy")}"},
+					{"body",$"your subscription has been renewed through {newSubscription.EndDate.ToString("dd MMM, yyyy")} 🥳🥳"},
 				};
 
 			var body = _emailBodyBuilder.GetEmailBody(EmailTemplates.Notification, placeholders);
 
-
-			await _emailSender.SendEmailAsync(
+			BackgroundJob.Enqueue(() => _emailSender.SendEmailAsync(
 				subscriber.Email,
-				"Bookify Subscription Renewal", body);
-
+				"Bookify Subscription Renewal", body));
+			
 			//Send welcome message using whatsApp
 
 			if (subscriber.HasWhatsApp)
@@ -297,7 +300,7 @@ namespace Bookify.Web.Controllers
 
 				var mobileNumber = _webHostEnvironment.IsDevelopment() ? "966501642434" : subscriber.MobileNumber;
 
-				await _whatsAppClient.SendMessage(mobileNumber, WhatsAppLanguageCode.English_US, WhatsAppTemplates.SubscriptionRenew, components);
+				BackgroundJob.Enqueue(() => _whatsAppClient.SendMessage(mobileNumber, WhatsAppLanguageCode.English_US, WhatsAppTemplates.SubscriptionRenew, components));
 			}
 
 			var viewModel = _mapper.Map<SubscriptionViewModel>(newSubscription);
@@ -312,28 +315,6 @@ namespace Bookify.Web.Controllers
 				.Where(a => a.GovernorateId == governorateId);
 
 			return Ok(_mapper.Map<IEnumerable<SelectListItem>>(areas));
-		}
-
-		public SubscriberFormViewModel PopulateViewModel(SubscriberFormViewModel model = null)
-		{
-			SubscriberFormViewModel viewModel = model is null ? new SubscriberFormViewModel() : model;
-
-			var governorate = _context.Governorates
-				.Where(g => !g.IsDeleted)
-				.OrderBy(g => g.Name)
-				.ToList();
-			viewModel.Governorates = _mapper.Map<IEnumerable<SelectListItem>>(governorate);
-
-			if (model?.GovernorateId > 0)
-			{
-				var areas = _context.Areas
-				.Where(a => a.GovernorateId == model.GovernorateId && !a.IsDeleted)
-				.OrderBy(g => g.Name)
-				.ToList();
-				viewModel.Areas = _mapper.Map<IEnumerable<SelectListItem>>(areas);
-			}
-
-			return viewModel;
 		}
 
 		public IActionResult AllowNationalId(SubscriberFormViewModel model)
@@ -363,5 +344,29 @@ namespace Bookify.Web.Controllers
 			var isAllowed = subscriber is null || subscriber.Id.Equals(subscriberId);
 			return Json(isAllowed);
 		}
+
+
+		private SubscriberFormViewModel PopulateViewModel(SubscriberFormViewModel model = null)
+		{
+			SubscriberFormViewModel viewModel = model is null ? new SubscriberFormViewModel() : model;
+
+			var governorate = _context.Governorates
+				.Where(g => !g.IsDeleted)
+				.OrderBy(g => g.Name)
+				.ToList();
+			viewModel.Governorates = _mapper.Map<IEnumerable<SelectListItem>>(governorate);
+
+			if (model?.GovernorateId > 0)
+			{
+				var areas = _context.Areas
+				.Where(a => a.GovernorateId == model.GovernorateId && !a.IsDeleted)
+				.OrderBy(g => g.Name)
+				.ToList();
+				viewModel.Areas = _mapper.Map<IEnumerable<SelectListItem>>(areas);
+			}
+
+			return viewModel;
+		}
+
 	}
 }

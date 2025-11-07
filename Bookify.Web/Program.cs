@@ -1,15 +1,17 @@
+using Bookify.Web.Helpers;
 using Bookify.Web.Seeds;
+using Bookify.Web.Services;
+using Hangfire;
 using Mapster;
+using Microsoft.AspNetCore.DataProtection;
 using Microsoft.AspNetCore.Identity;
+using Microsoft.AspNetCore.Identity.UI.Services;
 using System.Reflection;
 using UoN.ExpressiveAnnotations.NetCore.DependencyInjection;
-using Bookify.Web.Data;
-using Microsoft.EntityFrameworkCore;
-using Bookify.Web.Helpers;
-using Bookify.Web.Services;
-using Microsoft.AspNetCore.Identity.UI.Services;
-using Microsoft.AspNetCore.DataProtection;
 using WhatsAppCloudApi.Extensions;
+using Microsoft.AspNetCore.Builder;
+using Hangfire.Dashboard;
+using Bookify.Web.Tasks;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -50,6 +52,9 @@ builder.Services.AddControllersWithViews();
 builder.Services.AddExpressiveAnnotations();
 builder.Services.Configure<CloudinarySettings>(builder.Configuration.GetSection(nameof(CloudinarySettings)));
 builder.Services.Configure<MailSettings>(builder.Configuration.GetSection(nameof(MailSettings)));
+
+
+
 // ����� Mapster
 var config = TypeAdapterConfig.GlobalSettings;
 config.Scan(Assembly.GetExecutingAssembly());
@@ -58,6 +63,14 @@ config.Scan(Assembly.GetExecutingAssembly());
 builder.Services.AddSingleton(config);
 builder.Services.AddScoped<IMapper, ServiceMapper>();
 
+builder.Services.AddHangfire(x => x.UseSqlServerStorage(connectionString));
+builder.Services.AddHangfireServer();
+
+builder.Services.Configure<AuthorizationOptions>(options => options.AddPolicy("AdminsOnly", policy =>
+{
+	policy.RequireAuthenticatedUser();
+	//policy.RequireRole(AppRoles.Admin);
+}));
 
 var app = builder.Build();
 
@@ -91,6 +104,27 @@ var userManager = scope.ServiceProvider.GetRequiredService<UserManager<Applicati
 
 await DefaultRoles.SeedAsync(roleManager);
 await DefaultUsers.SeedAdminUserAsync(userManager);
+
+app.UseHangfireDashboard("/hangfire", new DashboardOptions
+{
+	DashboardTitle = "Bookify Dashboard",
+	//IsReadOnlyFunc = (DashboardContext context) => true,
+	Authorization = new IDashboardAuthorizationFilter[]
+	{
+		new HangfireAuthorizationFilter("AdminsOnly")
+	}
+});
+
+var dbContext = scope.ServiceProvider.GetRequiredService<ApplicationDbContext>();
+var webHostEnvironment = scope.ServiceProvider.GetRequiredService<IWebHostEnvironment>();
+var whatsAppClient = scope.ServiceProvider.GetRequiredService<IWhatsAppClient>();
+var emailBodyBuilder = scope.ServiceProvider.GetRequiredService<IEmailBodyBuilder>();
+var emailSender = scope.ServiceProvider.GetRequiredService<IEmailSender>();
+
+var hangfireTasks = new HangfireTasks(dbContext , webHostEnvironment , whatsAppClient , emailBodyBuilder , emailSender);
+
+RecurringJob.AddOrUpdate(() => hangfireTasks.SubscriptionExpirationAlert(), "0 14 * * *");
+RecurringJob.AddOrUpdate(() => hangfireTasks.RentalsExpirationAlert(), "0 14 * * *");
 
 app.MapControllerRoute(
 	name: "default",
